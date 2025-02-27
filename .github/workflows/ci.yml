@@ -33,7 +33,7 @@ jobs:
         run: yarn lint
 
       - name: Run Prettier
-        run: yarn prettier -- --check .
+        run: yarn prettier --ignore-path .gitignore --check **/*.{js,jsx,ts,tsx,json,css}
 
       - name: Check for TypeScript errors
         run: yarn tsc --noEmit
