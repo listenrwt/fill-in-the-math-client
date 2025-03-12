@@ -1,4 +1,5 @@
 import { Difficulty, MathSymbol } from './enum';
+import { Question } from './types';
 
 // TODO: Implement the function generateMathQuestion and finish the Docstring (take lib/game/enum.ts as reference).
 
@@ -19,7 +20,7 @@ import { Difficulty, MathSymbol } from './enum';
 
 // Please remove the following eslint-disable comment after implementing the function.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function generateMathQuestion(difficulty: Difficulty): (number | MathSymbol)[] {
+export function generateMathQuestion(difficulty: Difficulty): Question {
   return [1, MathSymbol.Addition, MathSymbol.Blank, MathSymbol.Equals, 3];
 }
 
@@ -32,6 +33,6 @@ export function generateMathQuestion(difficulty: Difficulty): (number | MathSymb
 
 // Please remove the following eslint-disable comment after implementing the function.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function checkQuestionValidity(question: (number | MathSymbol)[]): boolean {
+export function checkQuestionValidity(question: Question): boolean {
   return true;
 }
