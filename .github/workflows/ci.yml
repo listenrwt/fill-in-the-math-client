@@ -5,13 +5,10 @@ on:
   push:
     branches:
       - main
-      - develop # Add other branches as needed
   pull_request:
     branches:
       - main
-      - develop # Add other branches as needed
-  schedule:
-    - cron: '0 0 * * 1' # Runs every Monday at midnight UTC
+
 
 jobs:
   lint-and-test:
