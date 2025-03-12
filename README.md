@@ -1,4 +1,4 @@
-This is the CSCI3100 project - Fill in the Math.
+This is the CSCI3100 project - Fill in the Math Client Side.
 
 ## Getting Started
 
