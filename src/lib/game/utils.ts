@@ -11,6 +11,8 @@ function randint(min: number, max: number = NaN): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+const isNumber = (val: any) => typeof val === 'number' && val === val; // check for type and NaN
+
 const blank_difficulty_mapping = {
   easy: 1,
   medium: randint(1, 2),
@@ -167,15 +169,52 @@ export function generateMathQuestion(difficulty: Difficulty): Question {
   return equation_arr;
 }
 
-//TODO: Implement the function checkQuestionValidity and finish the Docstring.
-
-// Description: Check if the math question is valid.
-
-// Example: checkQuestionValidity([1, MathSymbol.Addition, MathSymbol.Blank, MathSymbol.Equals, 3] => true
-//          checkQuestionValidity([1, MathSymbol.Addition, 2, MathSymbol.Blank, 3, MathSymbol.Blank]) => false
-
-// Please remove the following eslint-disable comment after implementing the function.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/**
+ * Check if the math question is valid.
+ *
+ * @param {Question} question, containing the question equation with blanks
+ * @returns {Boolean}, whether the question is valid (see below)
+ *
+ * Example: checkQuestionValidity([1, MathSymbol.Addition, MathSymbol.Blank, MathSymbol.Equals, 3] => true
+ *         checkQuestionValidity([1, MathSymbol.Addition, 2, MathSymbol.Blank, 3, MathSymbol.Blank]) => false
+ * Details:
+ * For the input question array,
+ * 1. length of question >= 3 (sufficient condition for LHS, equals, RHS)
+ * 2. RHS must be a number
+ * 3. Contain 1 and only 1 equal sign;
+ * 4. Contain >= 1 blank;
+ * 5. Contain >= 2 number;
+ */
 export function checkQuestionValidity(question: Question): boolean {
+  // case 1: length is smaller than 3 (insufficient for LHS, equals, RHS)
+  if (question.length < 3) {
+    return false;
+  }
+  // case 2: check if value of RHS is a number
+  if (!isNumber(question[-1])) {
+    return false;
+  }
+
+  // case 3, 4. 5: equal, blank, number check
+  // counting number of equal, blank, and numbers
+  let count_equal = 0;
+  let count_blank = 0;
+  let count_number = 0;
+  for (const char of question) {
+    if (char == MathSymbol.Equals) count_equal++;
+    else if (char == MathSymbol.Blank) count_blank++;
+    else if (isNumber(char)) count_number++;
+  }
+
+  // equal: only 1 equal;
+  // blank: >= 1 blank;
+  // number: at least include one number on left and one number on right
+  const any_incorrect_count: boolean =
+    !(count_equal == 1) || !(count_blank >= 1) || !(count_number >= 2);
+
+  if (any_incorrect_count) {
+    return false;
+  }
+
   return true;
 }
