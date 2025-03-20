@@ -12,6 +12,7 @@ export function randint(min: number, max: number = NaN): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 const isNumber = (val: any) => typeof val === 'number' && val === val; // check for type and NaN
 
 /**
@@ -35,10 +36,9 @@ const isNumber = (val: any) => typeof val === 'number' && val === val; // check 
  */
 export function generateMathQuestion(difficulty: Difficulty): Question {
   // Generate random operators
-  //const operators: Operator[] = ['+', '-', '*', '/'];
   const operators = operator_difficulty_mapping[difficulty];
   const numOperations = randint(2, 3); // 2-3 operations
-  const selectedOperators: string[] = []; // storing operator only
+  const selectedOperators: MathSymbol[] = []; // storing operator only
 
   for (let i = 0; i < numOperations; i++) {
     let randomIndex = randint(operators.length - 1);
@@ -51,7 +51,8 @@ export function generateMathQuestion(difficulty: Difficulty): Question {
   }
 
   const include_mul_div: boolean =
-    selectedOperators.includes('*') || selectedOperators.includes('/');
+    selectedOperators.includes(MathSymbol.Multiplication) ||
+    selectedOperators.includes(MathSymbol.Division);
 
   // Generate numbers to use in the equation
   const numbers: number[] = [];
@@ -71,7 +72,7 @@ export function generateMathQuestion(difficulty: Difficulty): Question {
         numbers.push(randomDivisor);
       } else {
         // If no proper divisors, change the operation
-        selectedOperators[i - 1] = '+';
+        selectedOperators[i - 1] = MathSymbol.Addition;
         numbers.push(Math.floor(Math.random() * 9) + 1);
       }
     } else {
@@ -101,7 +102,7 @@ export function generateMathQuestion(difficulty: Difficulty): Question {
     }
   }
   // Create the equation array
-  const equation_arr: any[] = [numbers[0]];
+  const equation_arr: Question = [numbers[0]];
   for (let i = 0; i < selectedOperators.length; i++) {
     equation_arr.push(selectedOperators[i]);
     equation_arr.push(numbers[i + 1]);
@@ -128,7 +129,7 @@ export function generateMathQuestion(difficulty: Difficulty): Question {
   let pos = 0;
 
   for (const char of equation_arr) {
-    if (/\d/.test(char)) {
+    if (isNumber(char)) {
       // if is number: add a valid position
       allPositions.push(pos);
     }
