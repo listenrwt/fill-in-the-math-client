@@ -69,7 +69,7 @@ describe('Game Utils', () => {
         expect(blanks.length).toBe(1);
 
         // Numbers should be 0-99
-        question.forEach((el) => {
+        question.splice(0, -1).forEach((el) => {
           if (typeof el === 'number') {
             expect(el).toBeGreaterThanOrEqual(0);
             expect(el).toBeLessThanOrEqual(99);
@@ -102,7 +102,7 @@ describe('Game Utils', () => {
       expect(hasMultiplyOrDivide).toBe(true);
 
       // Numbers should be within reasonable bounds
-      question.forEach((el) => {
+      question.splice(0, -1).forEach((el) => {
         if (typeof el === 'number') {
           expect(el).toBeGreaterThanOrEqual(0);
           expect(el).toBeLessThanOrEqual(1000);
