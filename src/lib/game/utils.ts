@@ -1,4 +1,8 @@
-import { blank_difficulty_mapping, operator_difficulty_mapping } from './dictionary';
+import {
+  blank_difficulty_mapping,
+  num_operation_difficulty_mapping,
+  operator_difficulty_mapping,
+} from './dictionary';
 import { Difficulty, MathSymbol } from './enum';
 import { Question } from './types';
 
@@ -37,11 +41,18 @@ const isNumber = (val: any) => typeof val === 'number' && val === val; // check 
 export function generateMathQuestion(difficulty: Difficulty): Question {
   // Generate random operators
   const operators = operator_difficulty_mapping[difficulty];
-  const numOperations = randint(2, 3); // 2-3 operations
+  const numOperations = num_operation_difficulty_mapping[difficulty];
   const selectedOperators: MathSymbol[] = []; // storing operator only
 
   for (let i = 0; i < numOperations; i++) {
     let randomIndex = randint(operators.length - 1);
+    if (
+      difficulty == 'medium' &&
+      selectedOperators.includes(MathSymbol.Multiplication || MathSymbol.Division)
+    ) {
+      // algorithm: for medium, only 1 operator if multiplication is allowed
+      break;
+    }
     if (difficulty == 'hard' && i == 0) {
       // algorithm: for hard, pick from multiplication and division first
       randomIndex = randint(2, 3);
@@ -129,7 +140,7 @@ export function generateMathQuestion(difficulty: Difficulty): Question {
   let pos = 0;
 
   for (const char of equation_arr) {
-    if (isNumber(char)) {
+    if (isNumber(char) && pos != equation_arr.length - 1) {
       // if is number: add a valid position
       allPositions.push(pos);
     }
@@ -137,18 +148,21 @@ export function generateMathQuestion(difficulty: Difficulty): Question {
   }
 
   // Randomly select positions for blanks
-  const selectedPositions = [];
+  const selectedBlankPositions = [];
   for (let i = 0; i < numBlanks; i++) {
+    if (difficulty == Difficulty.Medium && include_mul_div && i >= 1)
+      // if medium and mul div -> only 1 blank
+      break;
     if (allPositions.length > 0) {
-      const randomIndex = Math.floor(Math.random() * allPositions.length);
-      const position = allPositions[randomIndex];
-      selectedPositions.push(position);
-      allPositions.splice(randomIndex, 1);
+      const chosenIndex = randint(allPositions.length - 1);
+      const position_index = allPositions[chosenIndex];
+      selectedBlankPositions.push(position_index);
+      allPositions.splice(chosenIndex, 1);
     }
   }
 
   // Create blanks with positions and values
-  for (const position of selectedPositions) {
+  for (const position of selectedBlankPositions) {
     equation_arr[position] = MathSymbol.Blank;
   }
 
@@ -177,9 +191,9 @@ export function checkQuestionValidity(question: Question): boolean {
     return false;
   }
   // case 2: check if value of RHS is a number
-  if (!isNumber(question[-1])) {
-    return false;
-  }
+  // if (!isNumber(question[-1])) {
+  //   return false;
+  // }
 
   // case 3, 4. 5: equal, blank, number check
   // counting number of equal, blank, and numbers
@@ -199,6 +213,24 @@ export function checkQuestionValidity(question: Question): boolean {
     !(count_equal == 1) || !(count_blank >= 1) || !(count_number >= 2);
 
   if (any_incorrect_count) {
+    return false;
+  }
+
+  // Case 6: Specific Situation: duplicated blank leading to same number solution e.g 7 + _ = _
+  if (
+    count_blank == 2 &&
+    question[-1] === MathSymbol.Blank &&
+    question.slice(0, -1).includes(MathSymbol.Blank)
+  ) {
+    return false;
+  }
+
+  const equal_sign_index = question.indexOf(MathSymbol.Equals);
+  const RHS = question.slice(equal_sign_index);
+
+  const duplicated_blank_RHS = RHS.filter((el: any) => el === MathSymbol.Blank).length;
+  // Case 7: Specific Situation: duplicated blank on the right side
+  if (count_blank >= 2 && duplicated_blank_RHS) {
     return false;
   }
 

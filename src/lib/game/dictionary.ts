@@ -7,6 +7,12 @@ export const blank_difficulty_mapping = {
   hard: randint(1, 2),
 };
 
+export const num_operation_difficulty_mapping = {
+  easy: 1,
+  medium: randint(1, 2),
+  hard: randint(1, 2),
+};
+
 export const operator_difficulty_mapping = {
   easy: [MathSymbol.Addition, MathSymbol.Subtraction],
   medium: [
