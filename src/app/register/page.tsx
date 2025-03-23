@@ -1,8 +1,7 @@
+// Remember the guest mode button
 import { Grid2 } from '@mui/material';
 
-import LoginForm from '../components/login/login_form';
-
-// Remember the guest mode button
+import RegisterForm from '../components/login/register_form';
 
 export default function Page() {
   return (
@@ -14,7 +13,7 @@ export default function Page() {
       justifyContent="center"
       sx={{ minHeight: '100vh' }}
     >
-      <LoginForm />
+      <RegisterForm />
     </Grid2>
   );
 }
