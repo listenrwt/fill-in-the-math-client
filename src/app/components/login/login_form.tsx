@@ -6,6 +6,28 @@ import { useRouter } from 'next/navigation';
 
 import { Box, Button, TextField, Typography } from '@mui/material';
 
+/**
+ * LoginForm component handles user authentication through a form interface.
+ *
+ * @component
+ * @returns {TSX.Element} A material-ui styled login form with username and password fields
+ *
+ * Features:
+ * - Username and password input fields
+ * - Login button that currently logs credentials to console
+ * - Registration redirect button
+ * - Styled using Material-UI components
+ *
+ * @example
+ * ```tsx
+ * <LoginForm />
+ * ```
+ *
+ * Dependencies:
+ * - Material-UI components (Box, Typography, TextField, Button)
+ * - React useState hook
+ * - Next.js useRouter hook
+ */
 export default function LoginForm() {
   const router = useRouter(); // Initialize the router
   const [username, setUsername] = useState('');
@@ -81,7 +103,7 @@ export default function LoginForm() {
         onClick={switchToRegister}
         sx={{ mt: 2, fontSize: '0.875rem', color: 'blue', textTransform: 'none' }}
       >
-        Don&apost have an account? Register
+        Don&#39;t have an account? Register
       </Button>
     </Box>
   );

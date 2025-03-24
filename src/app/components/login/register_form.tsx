@@ -6,6 +6,26 @@ import { useRouter } from 'next/navigation';
 
 import { Box, Button, TextField, Typography } from '@mui/material';
 
+/**
+ * RegisterForm Component
+ *
+ * A component that provides a registration form for new users.
+ * It includes input fields for email, username, and password (with confirmation),
+ * as well as submission and navigation functionality.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * <RegisterForm />
+ * ```
+ *
+ * @returns {TSX.Element} A styled registration form with email, username,
+ * password inputs, a register button, and a link to switch to the login page.
+ *
+ * @remarks
+ * The form validates that the password and confirmation password match before submission.
+ * After successful registration, the user is redirected to the login page.
+ */
 export default function RegisterForm() {
   const router = useRouter(); // Initialize the router
   const [email, setEmail] = useState('');
