@@ -1,18 +1,51 @@
 // You can add more props to the component if needed.
+import CheckIcon from '@mui/icons-material/Check';
+import { Button } from '@mui/material';
+
 interface CalculatorButtonProps {
-  value: number;
+  value?: number | string;
   text: string;
   onClick?: () => void;
   disabled?: boolean;
+  variant?: 'number' | 'delete' | 'back' | 'confirm';
 }
 
-// TODO: Implement the CalculatorButton component
-const CalculatorButton: React.FC<CalculatorButtonProps> = ({ value, text, onClick, disabled }) => {
-  return (
-    <button onClick={onClick} disabled={disabled} value={value}>
-      {text}
-    </button>
-  );
-};
+export default function CalculatorButton({
+  // value,
+  text,
+  onClick,
+  disabled,
+  variant = 'number',
+}: CalculatorButtonProps) {
+  // Define styles based on button variant
+  const getButtonStyle = () => {
+    switch (variant) {
+      case 'delete':
+        return { bgcolor: 'red', color: 'white' };
+      case 'back':
+        return { bgcolor: '#262626', color: 'white' };
+      case 'confirm':
+        return { bgcolor: 'green', color: 'white' };
+      default:
+        return { bgcolor: '#5E5E5E', color: 'white' };
+    }
+  };
 
-export default CalculatorButton;
+  return (
+    <Button
+      variant="contained"
+      sx={{
+        width: 60,
+        height: 60,
+        fontSize: '1.5rem',
+        borderRadius: 2,
+        ...getButtonStyle(),
+        '&:hover': { opacity: 0.8 },
+      }}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {variant === 'confirm' ? <CheckIcon /> : text}
+    </Button>
+  );
+}
