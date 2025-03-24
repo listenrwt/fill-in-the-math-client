@@ -228,7 +228,9 @@ export function checkQuestionValidity(question: Question): boolean {
   const equal_sign_index = question.indexOf(MathSymbol.Equals);
   const RHS = question.slice(equal_sign_index);
 
-  const duplicated_blank_RHS = RHS.filter((el: any) => el === MathSymbol.Blank).length;
+  const duplicated_blank_RHS = RHS.filter(
+    (el: MathSymbol | number) => el === MathSymbol.Blank
+  ).length;
   // Case 7: Specific Situation: duplicated blank on the right side
   if (count_blank >= 2 && duplicated_blank_RHS) {
     return false;
