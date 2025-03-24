@@ -1,7 +1,6 @@
 import { Difficulty, MathSymbol } from '../src/lib/game/enum';
 import { checkQuestionValidity, generateMathQuestion } from '../src/lib/game/utils';
 
-// TODO: remove the x from xdescribe to run the test after the implementation
 describe('Game Utils', () => {
   describe('generateMathQuestion', () => {
     test('should generate a valid Easy question', () => {
