@@ -1,7 +1,11 @@
 // Remember the guest mode button
+'use client';
+
 import { Grid2 } from '@mui/material';
 
 import RegisterForm from '../components/login/register_form';
+
+// Remember the guest mode button
 
 export default function Page() {
   return (
