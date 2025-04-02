@@ -11,6 +11,7 @@ export interface RoomConfig {
   maxPlayers: number;
   attackDamage: number;
   healAmount: number;
+  wrongAnswerPenalty: number;
 }
 
 export interface Room {
