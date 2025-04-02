@@ -26,7 +26,8 @@ class SocketService {
         resolve(this.socket as Socket);
       });
 
-      this.socket.on('connect_error', (error) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      this.socket.on('connect_error', (error: any) => {
         console.error('Connection error', error);
         reject(error);
       });
