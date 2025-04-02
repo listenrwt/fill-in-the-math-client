@@ -1,25 +1,39 @@
-import { useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 
 import { RoomEvents } from '../../events/events';
 import { RoomResponse } from '../../events/room.events';
 import { DEFAULT_ROOM_SETTINGS } from '../../lib/const';
 import socketService from '../../services/socket.service';
-import { Room } from '../../types/game.types';
+import { Room, RoomConfig } from '../../types/game.types';
+
+// Create a default config to avoid undefined issues
+const DEFAULT_CONFIG: RoomConfig = {
+  timeLimit: DEFAULT_ROOM_SETTINGS.TIME_LIMIT,
+  questionDifficulty: DEFAULT_ROOM_SETTINGS.DIFFICULTY,
+  maxPlayers: DEFAULT_ROOM_SETTINGS.MAX_PLAYERS,
+  attackDamage: DEFAULT_ROOM_SETTINGS.ATTACK_DAMAGE,
+  healAmount: DEFAULT_ROOM_SETTINGS.HEAL_AMOUNT,
+  wrongAnswerPenalty: DEFAULT_ROOM_SETTINGS.WRONG_ANSWER_PENALTY,
+};
 
 export const useRoomEvents = (isConnected: boolean) => {
   const [username, setUsername] = useState(DEFAULT_ROOM_SETTINGS.USERNAME);
   const [roomName, setRoomName] = useState(DEFAULT_ROOM_SETTINGS.ROOM_NAME);
   const [roomIdToJoin, setRoomIdToJoin] = useState('');
-  const [timeLimit, setTimeLimit] = useState(DEFAULT_ROOM_SETTINGS.TIME_LIMIT);
-  const [difficulty, setDifficulty] = useState(DEFAULT_ROOM_SETTINGS.DIFFICULTY);
-  const [maxPlayers, setMaxPlayers] = useState(DEFAULT_ROOM_SETTINGS.MAX_PLAYERS);
-  const [attackDamage, setAttackDamage] = useState(DEFAULT_ROOM_SETTINGS.ATTACK_DAMAGE);
-  const [healAmount, setHealAmount] = useState(DEFAULT_ROOM_SETTINGS.HEAL_AMOUNT);
-  const [wrongAnswerPenalty, setWrongAnswerPenalty] = useState(
-    DEFAULT_ROOM_SETTINGS.WRONG_ANSWER_PENALTY
-  );
+  // Use the default config to ensure roomConfig is never undefined
+  const [roomConfig, setRoomConfig] = useState<RoomConfig>(DEFAULT_CONFIG);
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
   const [gameMessage, setGameMessage] = useState('');
+
+  const handleRoomConfigChange = (
+    e: ChangeEvent<HTMLInputElement | { name: string; value: unknown }>
+  ) => {
+    const { name, value } = e.target;
+    setRoomConfig((prevConfig) => ({
+      ...prevConfig,
+      [name]: name === 'questionDifficulty' ? value : Number(value),
+    }));
+  };
 
   useEffect(() => {
     if (!isConnected) return;
@@ -60,14 +74,7 @@ export const useRoomEvents = (isConnected: boolean) => {
     socketService.emit(RoomEvents.CREATE_ROOM, {
       username,
       roomName,
-      config: {
-        timeLimit,
-        questionDifficulty: difficulty,
-        maxPlayers,
-        attackDamage,
-        healAmount,
-        wrongAnswerPenalty,
-      },
+      config: roomConfig,
     });
   };
 
@@ -93,14 +100,7 @@ export const useRoomEvents = (isConnected: boolean) => {
 
     socketService.emit(RoomEvents.UPDATE_SETTINGS, {
       roomId: currentRoom.id,
-      config: {
-        timeLimit,
-        questionDifficulty: difficulty,
-        maxPlayers,
-        attackDamage,
-        healAmount,
-        wrongAnswerPenalty,
-      },
+      config: roomConfig,
     });
   };
 
@@ -111,18 +111,8 @@ export const useRoomEvents = (isConnected: boolean) => {
     setRoomName,
     roomIdToJoin,
     setRoomIdToJoin,
-    timeLimit,
-    setTimeLimit,
-    difficulty,
-    setDifficulty,
-    maxPlayers,
-    setMaxPlayers,
-    attackDamage,
-    setAttackDamage,
-    healAmount,
-    setHealAmount,
-    wrongAnswerPenalty,
-    setWrongAnswerPenalty,
+    roomConfig,
+    handleRoomConfigChange,
     currentRoom,
     gameMessage,
     setCurrentRoom,

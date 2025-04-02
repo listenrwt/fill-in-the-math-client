@@ -1,3 +1,5 @@
+import { ChangeEvent } from 'react';
+
 import {
   Box,
   Button,
@@ -7,58 +9,55 @@ import {
   MenuItem,
   Paper,
   Select,
+  SelectChangeEvent,
   TextField,
   Typography,
 } from '@mui/material';
 
-import { QuestionDifficulty } from '../../../types/game.types';
+import { QuestionDifficulty, RoomConfig } from '../../../types/game.types';
 
 interface RoomManagementPanelProps {
   roomName: string;
   setRoomName: (name: string) => void;
-  timeLimit: number;
-  setTimeLimit: (limit: number) => void;
-  difficulty: QuestionDifficulty;
-  setDifficulty: (difficulty: QuestionDifficulty) => void;
-  maxPlayers: number;
-  setMaxPlayers: (count: number) => void;
-  attackDamage: number;
-  setAttackDamage: (damage: number) => void;
-  healAmount: number;
-  setHealAmount: (amount: number) => void;
-  wrongAnswerPenalty: number;
-  setWrongAnswerPenalty: (penalty: number) => void;
+  roomConfig: RoomConfig;
+  handleRoomConfigChange: (
+    e: ChangeEvent<HTMLInputElement | { name: string; value: unknown }>
+  ) => void;
   roomIdToJoin: string;
   setRoomIdToJoin: (id: string) => void;
   createRoom: () => void;
   joinRoom: () => void;
+  username: string;
+  setUsername: (name: string) => void;
 }
 
 export const RoomManagementPanel = ({
   roomName,
   setRoomName,
-  timeLimit,
-  setTimeLimit,
-  difficulty,
-  setDifficulty,
-  maxPlayers,
-  setMaxPlayers,
-  attackDamage,
-  setAttackDamage,
-  healAmount,
-  setHealAmount,
-  wrongAnswerPenalty,
-  setWrongAnswerPenalty,
+  roomConfig,
+  handleRoomConfigChange,
   roomIdToJoin,
   setRoomIdToJoin,
   createRoom,
   joinRoom,
+  username,
+  setUsername,
 }: RoomManagementPanelProps) => {
   return (
     <Paper sx={{ p: 2, mb: 3 }}>
       <Typography variant="h5" gutterBottom>
         Room Management
       </Typography>
+
+      <Box sx={{ mb: 2 }}>
+        <TextField
+          fullWidth
+          label="Your Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+      </Box>
 
       <Box sx={{ mb: 3 }}>
         <Typography variant="h6" gutterBottom>
@@ -78,17 +77,19 @@ export const RoomManagementPanel = ({
               fullWidth
               type="number"
               label="Time Limit (seconds)"
-              value={timeLimit}
-              onChange={(e) => setTimeLimit(Number(e.target.value))}
+              name="timeLimit"
+              value={roomConfig.timeLimit}
+              onChange={handleRoomConfigChange}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <FormControl fullWidth>
               <InputLabel>Difficulty</InputLabel>
               <Select
-                value={difficulty}
+                value={roomConfig.questionDifficulty}
                 label="Difficulty"
-                onChange={(e) => setDifficulty(e.target.value as QuestionDifficulty)}
+                name="questionDifficulty"
+                onChange={handleRoomConfigChange as (e: SelectChangeEvent) => void}
               >
                 <MenuItem value={QuestionDifficulty.EASY}>Easy</MenuItem>
                 <MenuItem value={QuestionDifficulty.MEDIUM}>Medium</MenuItem>
@@ -101,8 +102,9 @@ export const RoomManagementPanel = ({
               fullWidth
               type="number"
               label="Max Players"
-              value={maxPlayers}
-              onChange={(e) => setMaxPlayers(Number(e.target.value))}
+              name="maxPlayers"
+              value={roomConfig.maxPlayers}
+              onChange={handleRoomConfigChange}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
@@ -110,8 +112,9 @@ export const RoomManagementPanel = ({
               fullWidth
               type="number"
               label="Attack Damage"
-              value={attackDamage}
-              onChange={(e) => setAttackDamage(Number(e.target.value))}
+              name="attackDamage"
+              value={roomConfig.attackDamage}
+              onChange={handleRoomConfigChange}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
@@ -119,8 +122,9 @@ export const RoomManagementPanel = ({
               fullWidth
               type="number"
               label="Heal Amount"
-              value={healAmount}
-              onChange={(e) => setHealAmount(Number(e.target.value))}
+              name="healAmount"
+              value={roomConfig.healAmount}
+              onChange={handleRoomConfigChange}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
@@ -128,12 +132,19 @@ export const RoomManagementPanel = ({
               fullWidth
               type="number"
               label="Wrong Answer Penalty"
-              value={wrongAnswerPenalty}
-              onChange={(e) => setWrongAnswerPenalty(Number(e.target.value))}
+              name="wrongAnswerPenalty"
+              value={roomConfig.wrongAnswerPenalty}
+              onChange={handleRoomConfigChange}
             />
           </Grid>
           <Grid item xs={12}>
-            <Button variant="contained" color="primary" onClick={createRoom} fullWidth>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={createRoom}
+              disabled={!username}
+              fullWidth
+            >
               Create Room
             </Button>
           </Grid>
@@ -154,7 +165,13 @@ export const RoomManagementPanel = ({
             />
           </Grid>
           <Grid item xs={12}>
-            <Button variant="contained" color="secondary" onClick={joinRoom} fullWidth>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={joinRoom}
+              disabled={!roomIdToJoin || !username}
+              fullWidth
+            >
               Join Room
             </Button>
           </Grid>

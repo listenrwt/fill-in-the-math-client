@@ -9,7 +9,6 @@ import { GamePanel } from '../components/game-test/GamePanel';
 import { LeaderboardPanel } from '../components/game-test/LeaderboardPanel';
 import { MessagePanel } from '../components/game-test/MessagePanel';
 import { PlayerInfoPanel } from '../components/game-test/PlayerInfoPanel';
-import { RoomManagementPanel } from '../components/game-test/RoomManagementPanel';
 import { RoomPanel } from '../components/game-test/RoomPanel';
 
 export default function GameTestPage() {
@@ -20,11 +19,7 @@ export default function GameTestPage() {
     username,
     roomName,
     roomIdToJoin,
-    timeLimit,
-    difficulty,
-    maxPlayers,
-    attackDamage,
-    healAmount,
+    roomConfig,
     currentRoom,
     currentQuestion,
     answer,
@@ -32,20 +27,14 @@ export default function GameTestPage() {
     health,
     canPerformAction,
     leaderboard,
-    wrongAnswerPenalty,
 
     // State setters
     setServerUrl,
     setUsername,
     setRoomName,
     setRoomIdToJoin,
-    setTimeLimit,
-    setDifficulty,
-    setMaxPlayers,
-    setAttackDamage,
-    setHealAmount,
+    handleRoomConfigChange,
     setAnswer,
-    setWrongAnswerPenalty,
 
     // Actions
     connectToServer,
@@ -53,6 +42,7 @@ export default function GameTestPage() {
     createRoom,
     joinRoom,
     leaveRoom,
+    updateRoomSettings,
     startGame,
     submitAnswer,
     performAttack,
@@ -81,65 +71,39 @@ export default function GameTestPage() {
             currentRoom={currentRoom}
           />
 
-          {!currentRoom ? (
-            <RoomManagementPanel
-              roomName={roomName}
-              setRoomName={setRoomName}
-              timeLimit={timeLimit}
-              setTimeLimit={setTimeLimit}
-              difficulty={difficulty}
-              setDifficulty={setDifficulty}
-              maxPlayers={maxPlayers}
-              setMaxPlayers={setMaxPlayers}
-              attackDamage={attackDamage}
-              setAttackDamage={setAttackDamage}
-              healAmount={healAmount}
-              setHealAmount={setHealAmount}
-              roomIdToJoin={roomIdToJoin}
-              setRoomIdToJoin={setRoomIdToJoin}
-              createRoom={createRoom}
-              joinRoom={joinRoom}
-              wrongAnswerPenalty={wrongAnswerPenalty}
-              setWrongAnswerPenalty={setWrongAnswerPenalty}
+          <RoomPanel
+            username={username}
+            setUsername={setUsername}
+            roomName={roomName}
+            setRoomName={setRoomName}
+            roomConfig={roomConfig}
+            handleRoomConfigChange={handleRoomConfigChange}
+            roomIdToJoin={roomIdToJoin}
+            setRoomIdToJoin={setRoomIdToJoin}
+            currentRoom={currentRoom}
+            createRoom={createRoom}
+            joinRoom={joinRoom}
+            leaveRoom={leaveRoom}
+            updateRoomSettings={updateRoomSettings}
+            startGame={startGame}
+          />
+
+          {currentRoom && currentRoom.status === RoomStatus.IN_PROGRESS && (
+            <GamePanel
+              currentRoom={currentRoom}
+              health={health}
+              currentQuestion={currentQuestion}
+              answer={answer}
+              setAnswer={setAnswer}
+              canPerformAction={canPerformAction}
+              submitAnswer={submitAnswer}
+              performHeal={performHeal}
+              performAttack={performAttack}
             />
-          ) : (
-            <>
-              <RoomPanel
-                currentRoom={currentRoom}
-                timeLimit={timeLimit}
-                setTimeLimit={setTimeLimit}
-                difficulty={difficulty}
-                setDifficulty={setDifficulty}
-                maxPlayers={maxPlayers}
-                setMaxPlayers={setMaxPlayers}
-                attackDamage={attackDamage}
-                setAttackDamage={setAttackDamage}
-                healAmount={healAmount}
-                setHealAmount={setHealAmount}
-                leaveRoom={leaveRoom}
-                startGame={startGame}
-                wrongAnswerPenalty={wrongAnswerPenalty}
-                setWrongAnswerPenalty={setWrongAnswerPenalty}
-              />
+          )}
 
-              {currentRoom.status === RoomStatus.IN_PROGRESS && (
-                <GamePanel
-                  currentRoom={currentRoom}
-                  health={health}
-                  currentQuestion={currentQuestion}
-                  answer={answer}
-                  setAnswer={setAnswer}
-                  canPerformAction={canPerformAction}
-                  submitAnswer={submitAnswer}
-                  performHeal={performHeal}
-                  performAttack={performAttack}
-                />
-              )}
-
-              {currentRoom.status === RoomStatus.FINISHED && (
-                <LeaderboardPanel leaderboard={leaderboard} />
-              )}
-            </>
+          {currentRoom && currentRoom.status === RoomStatus.FINISHED && (
+            <LeaderboardPanel leaderboard={leaderboard} />
           )}
 
           <MessagePanel gameMessage={gameMessage} />
