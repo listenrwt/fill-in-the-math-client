@@ -1,4 +1,3 @@
-// Remember the guest mode button
 'use client';
 
 import { Grid2 } from '@mui/material';
