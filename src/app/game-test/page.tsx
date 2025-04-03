@@ -44,6 +44,7 @@ export default function GameTestPage() {
     leaveRoom,
     updateRoomSettings,
     startGame,
+    restartGame,
     submitAnswer,
     performAttack,
     performHeal,
@@ -86,6 +87,7 @@ export default function GameTestPage() {
             leaveRoom={leaveRoom}
             updateRoomSettings={updateRoomSettings}
             startGame={startGame}
+            restartGame={restartGame}
           />
 
           {currentRoom && currentRoom.status === RoomStatus.IN_PROGRESS && (

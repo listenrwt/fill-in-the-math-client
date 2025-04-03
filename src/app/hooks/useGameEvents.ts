@@ -10,7 +10,7 @@ import {
 } from '../../events/game.events';
 import { ErrorResponse, RoomResponse } from '../../events/room.events';
 import socketService from '../../services/socket.service';
-import { ActionType, LeaderboardEntry, Question } from '../../types/game.types';
+import { ActionType, LeaderboardEntry, Question, RoomStatus } from '../../types/game.types';
 import { useConnectionEvents } from './useConnectionEvents';
 import { useRoomEvents } from './useRoomEvents';
 
@@ -30,6 +30,15 @@ export const useGameEvents = () => {
   const startGame = () => {
     if (!connectionEvents.isConnected || !roomEvents.currentRoom) return;
 
+    socketService.emit(GameEvents.START_GAME, {
+      roomId: roomEvents.currentRoom.id,
+    });
+  };
+
+  const restartGame = () => {
+    if (!connectionEvents.isConnected || !roomEvents.currentRoom) return;
+
+    // Use the existing START_GAME event to restart the game
     socketService.emit(GameEvents.START_GAME, {
       roomId: roomEvents.currentRoom.id,
     });
@@ -149,12 +158,25 @@ export const useGameEvents = () => {
 
     socketService.on<LeaderboardResponse>(GameEvents.LEADERBOARD_UPDATED, (data) => {
       setLeaderboard(data.leaderboard);
-      roomEvents.setGameMessage(`Game over! Winner: ${data.gameWinner}`);
+      if (data.gameWinner) {
+        roomEvents.setGameMessage(`Game over! Winner: ${data.gameWinner}`);
+      } else {
+        roomEvents.setGameMessage("Game over! It's a tie!");
+      }
     });
 
     socketService.on(GameEvents.GAME_ENDED, () => {
       setCurrentQuestion(null);
       setCanPerformAction(false);
+
+      // Update the currentRoom state to reflect that the game has ended
+      roomEvents.setCurrentRoom((prevRoom) => {
+        if (!prevRoom) return prevRoom;
+        return {
+          ...prevRoom,
+          status: RoomStatus.FINISHED,
+        };
+      });
     });
 
     // Add cleanup function to remove all listeners when component unmounts
@@ -197,6 +219,7 @@ export const useGameEvents = () => {
 
     // Game actions
     startGame,
+    restartGame,
     getQuestion,
     submitAnswer,
     performAttack,

@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useRef } from 'react';
+import { ChangeEvent } from 'react';
 
 import {
   Box,
@@ -34,6 +34,7 @@ interface RoomPanelProps {
   leaveRoom: () => void;
   updateRoomSettings: () => void;
   startGame?: () => void;
+  restartGame?: () => void;
 }
 
 export const RoomPanel = ({
@@ -50,41 +51,31 @@ export const RoomPanel = ({
   leaveRoom,
   updateRoomSettings,
   startGame,
+  restartGame,
 }: RoomPanelProps) => {
-  // Debounce timer for settings updates
-  const updateTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Custom change handler that triggers update after changes
-  const handleSettingChange = (
-    e: ChangeEvent<HTMLInputElement | { name: string; value: unknown }>
-  ) => {
-    // Update the local state immediately
-    handleRoomConfigChange(e);
-
-    // Debounce the API call to update settings
-    if (updateTimerRef.current) {
-      clearTimeout(updateTimerRef.current);
-    }
-
-    // Send update after 500ms of inactivity
-    updateTimerRef.current = setTimeout(() => {
-      updateRoomSettings();
-    }, 500);
-  };
-
-  // Clear timer when unmounting
-  useEffect(() => {
-    return () => {
-      if (updateTimerRef.current) {
-        clearTimeout(updateTimerRef.current);
-      }
-    };
-  }, []);
-
   // If we're in a room, show the room management UI
   if (currentRoom) {
     const isHost = currentRoom.hostId === socketService.getSocket()?.id;
     const isWaiting = currentRoom.status === RoomStatus.WAITING;
+    const isFinished = currentRoom.status === RoomStatus.FINISHED;
+
+    // Function to update settings and start game
+    const handleStartGame = () => {
+      if (startGame) {
+        // First update room settings, then start the game
+        updateRoomSettings();
+        startGame();
+      }
+    };
+
+    // Function to update settings and restart game
+    const handleRestartGame = () => {
+      if (restartGame) {
+        // First update room settings, then restart the game
+        updateRoomSettings();
+        restartGame();
+      }
+    };
 
     return (
       <Paper sx={{ p: 2, mb: 3 }}>
@@ -109,7 +100,7 @@ export const RoomPanel = ({
             </Box>
           </Grid>
 
-          {isHost && isWaiting && (
+          {isHost && (isWaiting || isFinished) && (
             <>
               <Grid item xs={12}>
                 <Typography variant="h6">Room Settings</Typography>
@@ -121,7 +112,7 @@ export const RoomPanel = ({
                   label="Time Limit (seconds)"
                   name="timeLimit"
                   value={roomConfig.timeLimit}
-                  onChange={handleSettingChange}
+                  onChange={handleRoomConfigChange}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -131,7 +122,7 @@ export const RoomPanel = ({
                     value={roomConfig.questionDifficulty}
                     label="Difficulty"
                     name="questionDifficulty"
-                    onChange={handleSettingChange as (e: SelectChangeEvent) => void}
+                    onChange={handleRoomConfigChange as (e: SelectChangeEvent) => void}
                   >
                     <MenuItem value={QuestionDifficulty.EASY}>Easy</MenuItem>
                     <MenuItem value={QuestionDifficulty.MEDIUM}>Medium</MenuItem>
@@ -146,7 +137,7 @@ export const RoomPanel = ({
                   label="Max Players"
                   name="maxPlayers"
                   value={roomConfig.maxPlayers}
-                  onChange={handleSettingChange}
+                  onChange={handleRoomConfigChange}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -156,7 +147,7 @@ export const RoomPanel = ({
                   label="Attack Damage"
                   name="attackDamage"
                   value={roomConfig.attackDamage}
-                  onChange={handleSettingChange}
+                  onChange={handleRoomConfigChange}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -166,7 +157,7 @@ export const RoomPanel = ({
                   label="Heal Amount"
                   name="healAmount"
                   value={roomConfig.healAmount}
-                  onChange={handleSettingChange}
+                  onChange={handleRoomConfigChange}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -176,7 +167,7 @@ export const RoomPanel = ({
                   label="Wrong Answer Penalty"
                   name="wrongAnswerPenalty"
                   value={roomConfig.wrongAnswerPenalty}
-                  onChange={handleSettingChange}
+                  onChange={handleRoomConfigChange}
                 />
               </Grid>
             </>
@@ -188,10 +179,22 @@ export const RoomPanel = ({
                 <Button
                   variant="contained"
                   color="success"
-                  onClick={startGame}
+                  onClick={handleStartGame}
                   disabled={currentRoom.players.length < 2}
                 >
                   Start Game
+                </Button>
+              </Grid>
+            )}
+            {isHost && isFinished && restartGame && (
+              <Grid item>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleRestartGame}
+                  disabled={currentRoom.players.length < 2}
+                >
+                  Restart Game
                 </Button>
               </Grid>
             )}
@@ -224,71 +227,6 @@ export const RoomPanel = ({
               label="Room Name"
               value={roomName}
               onChange={(e) => setRoomName(e.target.value)}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              fullWidth
-              type="number"
-              label="Time Limit (seconds)"
-              name="timeLimit"
-              value={roomConfig.timeLimit}
-              onChange={handleRoomConfigChange}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <FormControl fullWidth>
-              <InputLabel>Difficulty</InputLabel>
-              <Select
-                value={roomConfig.questionDifficulty}
-                label="Difficulty"
-                name="questionDifficulty"
-                onChange={handleRoomConfigChange as (e: SelectChangeEvent) => void}
-              >
-                <MenuItem value={QuestionDifficulty.EASY}>Easy</MenuItem>
-                <MenuItem value={QuestionDifficulty.MEDIUM}>Medium</MenuItem>
-                <MenuItem value={QuestionDifficulty.HARD}>Hard</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              fullWidth
-              type="number"
-              label="Max Players"
-              name="maxPlayers"
-              value={roomConfig.maxPlayers}
-              onChange={handleRoomConfigChange}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              fullWidth
-              type="number"
-              label="Attack Damage"
-              name="attackDamage"
-              value={roomConfig.attackDamage}
-              onChange={handleRoomConfigChange}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              fullWidth
-              type="number"
-              label="Heal Amount"
-              name="healAmount"
-              value={roomConfig.healAmount}
-              onChange={handleRoomConfigChange}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              fullWidth
-              type="number"
-              label="Wrong Answer Penalty"
-              name="wrongAnswerPenalty"
-              value={roomConfig.wrongAnswerPenalty}
-              onChange={handleRoomConfigChange}
             />
           </Grid>
           <Grid item xs={12}>
