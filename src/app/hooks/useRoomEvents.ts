@@ -20,7 +20,6 @@ export const useRoomEvents = (isConnected: boolean) => {
   const [username, setUsername] = useState(DEFAULT_ROOM_SETTINGS.USERNAME);
   const [roomName, setRoomName] = useState(DEFAULT_ROOM_SETTINGS.ROOM_NAME);
   const [roomIdToJoin, setRoomIdToJoin] = useState('');
-  // Use the default config to ensure roomConfig is never undefined
   const [roomConfig, setRoomConfig] = useState<RoomConfig>(DEFAULT_CONFIG);
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
   const [gameMessage, setGameMessage] = useState('');
