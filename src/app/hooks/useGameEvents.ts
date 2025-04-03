@@ -22,7 +22,7 @@ export const useGameEvents = () => {
   // Game state
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [answer, setAnswer] = useState('');
-  const [health, setHealth] = useState(0);
+  const [health, setHealth] = useState<number>(0);
   const [canPerformAction, setCanPerformAction] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
 
@@ -113,21 +113,26 @@ export const useGameEvents = () => {
     });
 
     socketService.on<HealthUpdateResponse>(GameEvents.HEALTH_UPDATED, (data) => {
-      // Update player's own health state variable if it's their health
-      if (socketService.getSocket()?.id === data.playerId) {
-        setHealth(data.newHealth);
-      }
+      // Process all health updates
+      data.updates.forEach((update) => {
+        // Update player's own health state variable if it's their health
+        if (socketService.getSocket()?.id === update.playerId) {
+          setHealth(update.newHealth);
+        }
+      });
 
-      // Always update the player's health in the current room state
+      // Always update all players' health in the current room state
       roomEvents.setCurrentRoom((prevRoom) => {
         if (!prevRoom) return prevRoom;
 
         // Create a new room object with updated players array
         const updatedRoom = {
           ...prevRoom,
-          players: prevRoom.players.map((player) =>
-            player.id === data.playerId ? { ...player, health: data.newHealth } : player
-          ),
+          players: prevRoom.players.map((player) => {
+            // Find if there's an update for this player
+            const playerUpdate = data.updates.find((update) => update.playerId === player.id);
+            return playerUpdate ? { ...player, health: playerUpdate.newHealth } : player;
+          }),
         };
 
         return updatedRoom;

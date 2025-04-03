@@ -37,8 +37,10 @@ export interface ActionPerformedResponse extends BaseSocketMessage {
 }
 
 export interface HealthUpdateResponse extends BaseSocketMessage {
-  playerId: string;
-  newHealth: number;
+  updates: {
+    playerId: string;
+    newHealth: number;
+  }[];
 }
 
 export interface PlayerEliminatedResponse extends BaseSocketMessage {
