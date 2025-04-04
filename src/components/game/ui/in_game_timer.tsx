@@ -23,9 +23,9 @@ const InGameTimer = ({ duration = 30 }: InGameTimerProps) => {
   }, [duration]);
 
   return (
-    <Box sx={{ width: '80%', mx: 'auto', textAlign: 'center', mt: 2 }}>
+    <Box sx={{ width: '70%', mx: 'auto', textAlign: 'center', mt: 2 }}>
       {/* Timer Text */}
-      <Typography variant="h6" color="#262626" mb={1}>
+      <Typography variant="h6" color="#ffffff" mb={1}>
         Time Left: {timeLeft} {timeLeft === 1 ? 'second' : 'seconds'}
       </Typography>
 
@@ -33,7 +33,7 @@ const InGameTimer = ({ duration = 30 }: InGameTimerProps) => {
       <LinearProgress
         variant="determinate"
         value={progress}
-        sx={{ bgcolor: '#262626', height: 10, borderRadius: 5 }}
+        sx={{ bgcolor: '#ffffff', height: 10, borderRadius: 5 }}
       />
     </Box>
   );
