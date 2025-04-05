@@ -2,13 +2,14 @@ import { Box, Button, Card, CardContent, Grid, Paper, TextField, Typography } fr
 
 import socketService from '../../../services/socket.service';
 import { Question, Room } from '../../../types/game.types';
+import { MathSymbol } from '../../../types/game.types';
 
 interface GamePanelProps {
   currentRoom: Room;
   health: number;
   currentQuestion: Question | null;
-  answer: string;
-  setAnswer: (answer: string) => void;
+  answer: number[];
+  setAnswer: (answer: number[]) => void;
   canPerformAction: boolean;
   submitAnswer: () => void;
   performHeal: () => void;
@@ -26,6 +27,97 @@ export const GamePanel = ({
   performHeal,
   performAttack,
 }: GamePanelProps) => {
+  const getDisplayedEquation = (text: string) => {
+    if (!text) return [];
+
+    let numBlanks = 0;
+    for (const char of text) {
+      if (char == MathSymbol.Blank) {
+        numBlanks += 1;
+      }
+    }
+
+    let current_player_answer: number[];
+    if (answer.length < numBlanks) current_player_answer = Array(numBlanks);
+    else current_player_answer = [...answer];
+
+    function handleChange(index: number, answer: string) {
+      current_player_answer[index] = Number(answer);
+      // TODO: bug here for setting answer, leading to failure in checking correctness
+      setAnswer(current_player_answer);
+    }
+
+    const parts = [];
+    let part_index = 0;
+    let blank_index = 0;
+
+    let current_sub_string = '';
+    for (const char of text) {
+      // aggregate substring
+      if (char != MathSymbol.Blank) {
+        current_sub_string += char;
+        continue;
+      }
+      // Add text before the blank
+      parts.push(
+        <Typography
+          key={`text-${part_index}`}
+          component="span"
+          variant="h4"
+          sx={{ fontFamily: 'monospace' }}
+        >
+          {current_sub_string}
+        </Typography>
+      );
+
+      current_sub_string = ''; // clear current substring
+
+      // Add the blank input field
+      parts.push(
+        <TextField
+          key={`blank-${blank_index}`}
+          variant="outlined"
+          inputProps={{ maxLength: 1, readOnly: false }}
+          type={'number'}
+          value={answer[blank_index]}
+          onChange={(e) => handleChange(blank_index, e.target.value)}
+        />
+      );
+
+      part_index++;
+      blank_index++;
+    }
+
+    // Add any remaining text
+    parts.push(
+      <Typography
+        key={`text-${part_index}`}
+        component="span"
+        variant="h4"
+        sx={{ fontFamily: 'monospace' }}
+      >
+        {current_sub_string}
+      </Typography>
+    );
+
+    parts.push(
+      <Grid item xs={4}>
+        <Button
+          key="button2"
+          variant="contained"
+          color="primary"
+          onClick={submitAnswer}
+          fullWidth
+          disabled={canPerformAction || answer.length == 0}
+        >
+          Submit
+        </Button>
+      </Grid>
+    );
+
+    return parts;
+  };
+
   return (
     <Paper sx={{ p: 2, mb: 3 }}>
       <Typography variant="h5" gutterBottom>
@@ -80,12 +172,16 @@ export const GamePanel = ({
         <Box sx={{ mb: 3 }}>
           <Card sx={{ mb: 2, bgcolor: 'info.light', color: 'info.contrastText' }}>
             <CardContent>
-              <Typography variant="h5">Question: {currentQuestion.text}</Typography>
+              <Typography variant="h5">
+                Question: {getDisplayedEquation(currentQuestion.text)}
+              </Typography>
             </CardContent>
           </Card>
 
           <Grid container spacing={2}>
-            <Grid item xs={8}>
+            {
+              // Original implementation
+              /* <Grid item xs={8}>
               <TextField
                 fullWidth
                 label="Your Answer"
@@ -94,14 +190,15 @@ export const GamePanel = ({
                 onChange={(e) => setAnswer(e.target.value)}
                 disabled={canPerformAction}
               />
-            </Grid>
+            </Grid> */
+            }
             <Grid item xs={4}>
               <Button
                 variant="contained"
                 color="primary"
                 onClick={submitAnswer}
                 fullWidth
-                disabled={canPerformAction || answer === ''}
+                disabled={canPerformAction || answer.length == 0}
               >
                 Submit
               </Button>

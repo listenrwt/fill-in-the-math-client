@@ -21,7 +21,7 @@ export const useGameEvents = () => {
 
   // Game state
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  const [answer, setAnswer] = useState('');
+  const [answer, setAnswer] = useState<number[]>(Array(2));
   const [health, setHealth] = useState<number>(0);
   const [canPerformAction, setCanPerformAction] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -55,13 +55,10 @@ export const useGameEvents = () => {
   const submitAnswer = () => {
     if (!connectionEvents.isConnected || !roomEvents.currentRoom || !currentQuestion) return;
 
-    const numAnswer = Number(answer);
-    if (isNaN(numAnswer)) return;
-
     socketService.emit(GameEvents.SUBMIT_ANSWER, {
       roomId: roomEvents.currentRoom.id,
       questionId: currentQuestion.id,
-      answer: numAnswer,
+      answer: answer,
     });
   };
 
@@ -118,7 +115,7 @@ export const useGameEvents = () => {
         roomEvents.setGameMessage(`Wrong! Correct answer: ${data.correctAnswer}`);
         getQuestion();
       }
-      setAnswer('');
+      setAnswer([]);
     });
 
     socketService.on<HealthUpdateResponse>(GameEvents.HEALTH_UPDATED, (data) => {

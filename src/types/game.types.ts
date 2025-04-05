@@ -37,13 +37,13 @@ export interface Player {
 export interface Question {
   id: string;
   text: string;
-  answer: number;
+  answer: number[];
   difficulty: QuestionDifficulty;
 }
 
 export interface PlayerAnswer extends BaseSocketMessage {
   questionId: string;
-  answer: number;
+  answer: number[];
   isCorrect: boolean;
   timeSpent: number;
 }
@@ -80,4 +80,19 @@ export enum RoomStatus {
 export enum ActionType {
   ATTACK = 'attack',
   HEAL = 'heal',
+}
+
+// Enums
+// Game Generation related
+/**
+ * Enumeration representing mathematical operation symbols and a blank placeholder.
+ * @enum {string}
+ */
+export enum MathSymbol {
+  Addition = '+',
+  Subtraction = '-',
+  Multiplication = '*',
+  Division = '/',
+  Equals = '=',
+  Blank = '?',
 }
