@@ -34,14 +34,15 @@ export default function LobbyPage() {
       direction="column"
       justifyContent="center"
       alignItems="center"
-      sx={{ minHeight: '100vh', backgroundColor: '#000', p: 2 }}
+      spacing={2}
+      sx={{ minHeight: '100vh', p: 2 }}
     >
-      <Grid2 xs={12} sx={{ mb: 3 }}>
-        <Typography variant="h4" sx={{ color: '#ffffff', textAlign: 'center' }}>
+      <Grid2>
+        <Typography variant="h4" sx={{ textAlign: 'center' }}>
           Enter Room Code
         </Typography>
       </Grid2>
-      <Grid2 xs={12} sx={{ mb: 3 }}>
+      <Grid2>
         <TextField
           value={roomCode}
           onChange={handleChange}
@@ -49,14 +50,14 @@ export default function LobbyPage() {
           placeholder="______"
           inputProps={{
             maxLength: 6,
-            style: { textAlign: 'center', color: 'white', fontSize: '1.5rem' },
+            style: { textAlign: 'center', fontSize: '1.5rem' },
           }}
           sx={{
             '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: '#ffffff' } },
           }}
         />
       </Grid2>
-      <Grid2 xs={12}>
+      <Grid2>
         <Button variant="contained" onClick={handleSubmit} sx={{ bgcolor: 'green' }}>
           Join Room
         </Button>
