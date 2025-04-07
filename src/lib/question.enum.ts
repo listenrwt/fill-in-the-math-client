@@ -16,7 +16,7 @@ export enum MathSymbol {
  * @enum {string}
  */
 export enum Difficulty {
-  Easy = 'easy',
-  Medium = 'medium',
-  Hard = 'hard',
+  EASY = 'easy',
+  MEDIUM = 'medium',
+  HARD = 'hard',
 }

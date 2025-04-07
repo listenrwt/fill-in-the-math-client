@@ -4,8 +4,8 @@
 // Result: 1 + 2 * ? = 4
 import { Box, Typography } from '@mui/material';
 
-import { MathSymbol } from '@/lib/game/enum';
-import { Question } from '@/lib/game/types';
+import { MathSymbol } from '@/lib/question.enum';
+import { Question } from '@/lib/question.types';
 
 interface CalculatorDisplayProps {
   question: Question;

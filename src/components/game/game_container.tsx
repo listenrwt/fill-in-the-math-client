@@ -2,8 +2,8 @@ import { useState } from 'react';
 
 import { Grid2 } from '@mui/material';
 
-import { MathSymbol } from '@/lib/game/enum';
-import { Question } from '@/lib/game/types';
+import { MathSymbol } from '@/lib/question.enum';
+import { Question } from '@/lib/question.types';
 
 import CalculatorDisplay from './ui/calculator_display';
 import CalculatorPanel from './ui/calculator_panel';
