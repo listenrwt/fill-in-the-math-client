@@ -1,4 +1,3 @@
-/* app/waiting_room/page.tsx */
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -7,14 +6,6 @@ import { useRouter } from 'next/navigation';
 
 import { Avatar, Button, Grid2, Switch, TextField, Typography } from '@mui/material';
 import { Socket, io } from 'socket.io-client';
-
-/* app/waiting_room/page.tsx */
-
-/* app/waiting_room/page.tsx */
-
-/* app/waiting_room/page.tsx */
-
-/* app/waiting_room/page.tsx */
 
 // Define the Player type
 type Player = {
