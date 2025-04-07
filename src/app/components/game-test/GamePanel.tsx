@@ -1,7 +1,7 @@
 import { Box, Button, Card, CardContent, Grid, Paper, TextField, Typography } from '@mui/material';
 
+import { Question, Room } from '../../../lib/game.types';
 import socketService from '../../../services/socket.service';
-import { Question, Room } from '../../../types/game.types';
 
 interface GamePanelProps {
   currentRoom: Room;

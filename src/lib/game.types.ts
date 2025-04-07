@@ -1,3 +1,5 @@
+import { Difficulty } from './question.enum';
+
 // Base interface for all socket communications
 export interface BaseSocketMessage {
   timestamp: number;
@@ -7,7 +9,7 @@ export interface BaseSocketMessage {
 // Room related interfaces
 export interface RoomConfig {
   timeLimit: number; // seconds
-  questionDifficulty: QuestionDifficulty;
+  questionDifficulty: Difficulty;
   maxPlayers: number;
   attackDamage: number;
   healAmount: number;
@@ -38,7 +40,7 @@ export interface Question {
   id: string;
   text: string;
   answer: number;
-  difficulty: QuestionDifficulty;
+  difficulty: Difficulty;
 }
 
 export interface PlayerAnswer extends BaseSocketMessage {
@@ -62,13 +64,6 @@ export interface LeaderboardEntry {
   rank: number;
   username: string;
   score: number;
-}
-
-// Enums
-export enum QuestionDifficulty {
-  EASY = 'easy',
-  MEDIUM = 'medium',
-  HARD = 'hard',
 }
 
 export enum RoomStatus {

@@ -1,4 +1,4 @@
-import { BaseSocketMessage, PlayerAction, Question } from '../types/game.types';
+import { BaseSocketMessage, PlayerAction, Question } from '../lib/game.types';
 
 // Request payloads
 export interface StartGameRequest extends BaseSocketMessage {

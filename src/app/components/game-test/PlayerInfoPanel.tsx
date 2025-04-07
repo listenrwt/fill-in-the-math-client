@@ -1,6 +1,6 @@
 import { Paper, TextField, Typography } from '@mui/material';
 
-import { Room } from '../../../types/game.types';
+import { Room } from '../../../lib/game.types';
 
 interface PlayerInfoPanelProps {
   username: string;

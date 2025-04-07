@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
+// import { useRouter } from 'next/navigation';
 
 import { Box, Button, TextField, Typography } from '@mui/material';
 
@@ -29,21 +31,17 @@ import { Box, Button, TextField, Typography } from '@mui/material';
  * - Next.js useRouter hook
  */
 export default function LoginForm() {
-  const router = useRouter(); // Initialize the router
+  // const router = useRouter(); // Initialize the router
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Logging in with:', { username, password });
-
-    // to be implemented later, to main page
-    router.push('/login');
   };
 
   const switchToRegister = () => {
     console.log('switching from login page to register page...');
-    router.push('/register');
   };
 
   return (
@@ -70,7 +68,7 @@ export default function LoginForm() {
           variant="filled"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: 'white' }, mb: 2 }}
+          sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: '#000000' }, mb: 2 }}
           InputLabelProps={{ style: { color: '#262626' } }}
         />
 
@@ -80,31 +78,36 @@ export default function LoginForm() {
           variant="filled"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: 'white' }, mb: 2 }}
+          sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: '#000000' }, mb: 2 }}
           InputLabelProps={{ style: { color: '#262626' } }}
         />
 
-        <Button
-          fullWidth
-          type="submit"
-          variant="contained"
-          sx={{
-            bgcolor: '#262626',
-            color: '#B3B3B3',
-            '&:hover': { bgcolor: '#1E1E1E', color: 'white' },
-            py: 1.5,
-            fontWeight: 'bold',
-          }}
-        >
-          Login
-        </Button>
+        <Link href={{ pathname: '/login' }}>
+          {/* temporary link, later change to main page after merging*/}
+          <Button
+            fullWidth
+            type="submit"
+            variant="contained"
+            sx={{
+              bgcolor: '#262626',
+              color: '#B3B3B3',
+              '&:hover': { bgcolor: '#1E1E1E', color: 'white' },
+              py: 1.5,
+              fontWeight: 'bold',
+            }}
+          >
+            Login
+          </Button>
+        </Link>
       </form>
-      <Button
-        onClick={switchToRegister}
-        sx={{ mt: 2, fontSize: '0.875rem', color: 'blue', textTransform: 'none' }}
-      >
-        Don&#39;t have an account? Register
-      </Button>
+      <Link href={{ pathname: '/register' }}>
+        <Button
+          onClick={switchToRegister}
+          sx={{ mt: 2, fontSize: '0.875rem', color: 'blue', textTransform: 'none' }}
+        >
+          Don&#39;t have an account? Register
+        </Button>
+      </Link>
     </Box>
   );
 }
