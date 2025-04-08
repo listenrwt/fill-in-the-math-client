@@ -2,7 +2,9 @@
 
 import { Grid2 } from '@mui/material';
 
-import GameContainer from '@/components/game/game_container';
+import GameContainer from '@/app/components/game/game_container';
+
+import InGameTimer from '../components/game/ui/in_game_timer';
 
 // import Logo from '@/components/game_logo';
 
@@ -11,6 +13,7 @@ export default function Page() {
   return (
     <Grid2>
       {/* <InGameLeaderboard/> */}
+      <InGameTimer duration={15} />
       <GameContainer />
     </Grid2>
   );

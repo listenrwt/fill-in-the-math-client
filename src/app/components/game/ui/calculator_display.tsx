@@ -21,12 +21,14 @@ const CalculatorDisplay = ({ question }: CalculatorDisplayProps) => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        bgcolor: 'grey.300',
+        bgcolor: '#D9D9D9',
         p: 2,
         borderRadius: 2,
-        fontSize: '1.5rem',
+        fontSize: '2rem',
         fontWeight: 'bold',
         gap: 1,
+        color: '#000',
+        fontFamily: 'Andale Mono, monospace',
       }}
     >
       {question.map((item, index) => (
@@ -35,12 +37,15 @@ const CalculatorDisplay = ({ question }: CalculatorDisplayProps) => {
           sx={{
             p: 1,
             borderRadius: 1,
-            bgcolor: item === MathSymbol.Blank ? 'black' : 'transparent',
-            color: item === MathSymbol.Blank ? 'white' : 'black',
-            fontSize: '1.8rem',
+            bgcolor: item === MathSymbol.Blank ? '#262626' : 'transparent',
+            color: item === MathSymbol.Blank ? '#fff' : '#000',
+            fontSize: '2rem',
+            minWidth: 30,
+            textAlign: 'center',
+            fontFamily: 'Andale Mono, monospace',
           }}
         >
-          {item}
+          {item === MathSymbol.Blank ? '?' : item}
         </Typography>
       ))}
     </Box>
