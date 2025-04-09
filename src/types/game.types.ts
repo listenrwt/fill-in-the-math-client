@@ -36,8 +36,7 @@ export interface Player {
 // Question related interfaces
 export interface Question {
   id: string;
-  text: string;
-  answer: number[];
+  equation_arr: (number | MathSymbol)[];
   difficulty: QuestionDifficulty;
 }
 
