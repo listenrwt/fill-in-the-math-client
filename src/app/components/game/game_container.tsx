@@ -8,6 +8,7 @@ import { Question } from '@/lib/question.types';
 import CalculatorDisplay from './ui/calculator_display';
 import CalculatorPanel from './ui/calculator_panel';
 import GameAction from './ui/game_action';
+import Stroke from './ui/stroke';
 
 export default function GameContainer() {
   const initialQuestion: Question = [
@@ -42,7 +43,7 @@ export default function GameContainer() {
     });
   };
 
-  const handleDelete = () => {
+  const handleClear = () => {
     setQuestion(initialQuestion);
     setFilledIndexes([]);
     setUsedNumbers([]);
@@ -82,13 +83,10 @@ export default function GameContainer() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: '100vh',
-        bgcolor: '#000',
-        color: '#fff',
-        p: 2,
+        minHeight: '50vh',
       }}
     >
-      <Box sx={{ mt: 4, width: '100%', maxWidth: 400 }}>
+      <Box sx={{ borderRadius: 2, bgcolor: '#D9D9D9', width: '100%', maxWidth: 1000 }}>
         {showGameAction ? (
           <GameAction
             onActionComplete={() => {
@@ -101,9 +99,10 @@ export default function GameContainer() {
         ) : (
           <>
             <CalculatorDisplay question={question} />
+            <Stroke />
             <CalculatorPanel
               onNumberClick={handleNumberClick}
-              onDelete={handleDelete}
+              onClear={handleClear}
               onDeleteLast={handleBackspace}
               onSubmit={handleSubmit}
               usedNumbers={usedNumbers}

@@ -20,7 +20,7 @@ export default function CalculatorPanel({
   const isNumberUsed = (num: number) => usedNumbers.includes(num);
 
   return (
-    <Box sx={{ mt: 2, bgcolor: '#262626', p: 2, borderRadius: 2 }}>
+    <Box sx={{ mt: 2, p: 2, borderRadius: 2 }}>
       <Grid container justifyContent="center" spacing={2} sx={{ mb: 1 }}>
         {[1, 2, 3].map((num) => (
           <Grid item key={num}>
@@ -62,10 +62,10 @@ export default function CalculatorPanel({
       </Grid>
       <Grid container justifyContent="center" spacing={2}>
         <Grid item>
-          <CalculatorButton value={'DEL'} text="DEL" variant="delete" onClick={onDelete} />
+          <CalculatorButton value={'DEL'} text="CLR" variant="delete" onClick={onDelete} />
         </Grid>
         <Grid item>
-          <CalculatorButton value={'BCK'} text="BCK" variant="back" onClick={onDeleteLast} />
+          <CalculatorButton value={'BCK'} text="DEL" variant="back" onClick={onDeleteLast} />
         </Grid>
         <Grid item>
           <CalculatorButton value={'CON'} text="✔" variant="confirm" onClick={onSubmit} />
