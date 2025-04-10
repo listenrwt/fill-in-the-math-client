@@ -4,6 +4,8 @@ import React, { useEffect } from 'react';
 import { Avatar, Box, Button, Card, CardContent, Grid2, Typography } from '@mui/material';
 import io, { Socket } from 'socket.io-client';
 
+import Stroke from './stroke';
+
 // Define a simple Player interface
 interface Player {
   id: number;
@@ -76,30 +78,31 @@ const GameAction: React.FC<GameActionProps> = ({ onActionComplete }) => {
       sx={{
         borderRadius: 2,
         padding: 2,
-        bgcolor: '#5E5E5E',
         minHeight: '50vh', // Takes half screen height
         display: 'flex', // Enables flexbox centering
         flexDirection: 'column', // Ensures everything stacks properly
-        width: { xs: '90%', sm: '90%', md: '100%' }, // Full width to center properly
-        // maxWidth: '1500px', // Prevents excessive stretching
+        width: '100%', // Full width to center properly
         margin: '0 auto', // Centers the container horizontally
       }}
     >
-      <Typography variant="h5" align="center" sx={{ marginBottom: 2, color: 'white' }}>
-        Correct! Selection
+      <Typography variant="h5" align="center" sx={{ marginBottom: 2, color: '#000000' }}>
+        Correct! Select Action
       </Typography>
-      <Typography align="center" sx={{ marginBottom: 4, color: 'white' }}>
-        Heal yourself for 5 seconds or Remove 5 seconds from another player
+      <Typography align="center" sx={{ marginBottom: 1, color: '#000000' }}>
+        Heal self for 5 seconds or Remove 5 seconds from another player
       </Typography>
+
+      <Stroke />
 
       <Box
         sx={{
+          marginTop: 3,
           display: 'flex',
           flexWrap: 'wrap',
           justifyContent: 'center',
           gap: 2,
           width: '100%',
-          //maxWidth: '1500px', // Limit maximum width to ensure cards fit in one row
+          height: { md: '300px' },
         }}
       >
         {allPlayers.map((player) => (
@@ -107,7 +110,7 @@ const GameAction: React.FC<GameActionProps> = ({ onActionComplete }) => {
             key={player.id}
             sx={{
               width: { xs: '100%', sm: '50%', md: '22%' },
-              minWidth: { xs: '80px', sm: '140px', md: '200px' },
+              minWidth: { xs: '100px', sm: '140px', md: '200px' },
               maxWidth: '250px',
               mb: 2,
             }}
@@ -133,6 +136,7 @@ const GameAction: React.FC<GameActionProps> = ({ onActionComplete }) => {
                     flexDirection: 'column',
                     alignItems: { xs: 'flex-start', md: 'center' },
                     width: '100%',
+                    minWidth: '160px',
                   }}
                 >
                   <Typography variant="subtitle1">{player.username}</Typography>

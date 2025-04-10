@@ -11,7 +11,7 @@ import InGameTimer from '../components/game/ui/in_game_timer';
 // Remember to use the correct colour and fonts
 export default function Page() {
   return (
-    <Grid2>
+    <Grid2 p={2}>
       {/* <InGameLeaderboard/> */}
       <InGameTimer duration={15} />
       <GameContainer />

@@ -23,14 +23,19 @@ const InGameTimer = ({ duration = 30 }: InGameTimerProps) => {
   }, [duration]);
 
   return (
-    <Box sx={{ width: '100%', textAlign: 'center', mt: 2 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       {/* Timer Text */}
       <Typography
         variant="h6"
         sx={{
           color: '#ffffff',
-          fontFamily: 'Andale Mono, monospace',
           fontWeight: 'bold',
+          textAlign: 'center',
         }}
         mb={1}
       >
@@ -42,12 +47,16 @@ const InGameTimer = ({ duration = 30 }: InGameTimerProps) => {
         variant="determinate"
         value={progress}
         sx={{
+          maxWidth: 1000,
+          width: '100%',
+          margin: '0 auto',
           bgcolor: '#7F7F7F',
           height: 10,
-          borderRadius: 5,
+          borderRadius: 0.5,
           '& .MuiLinearProgress-bar': {
-            bgcolor: '#E74D40',
+            bgcolor: '#ffffff',
           },
+          mb: 2,
         }}
       />
     </Box>
