@@ -4,7 +4,7 @@ import CalculatorButton from './calculator_button';
 
 interface CalculatorPanelProps {
   onNumberClick: (num: number) => void;
-  onDelete: () => void;
+  onClear: () => void;
   onDeleteLast: () => void;
   onSubmit: () => void;
   usedNumbers?: number[];
@@ -12,7 +12,7 @@ interface CalculatorPanelProps {
 
 export default function CalculatorPanel({
   onNumberClick,
-  onDelete,
+  onClear,
   onDeleteLast,
   onSubmit,
   usedNumbers = [],
@@ -62,10 +62,10 @@ export default function CalculatorPanel({
       </Grid>
       <Grid container justifyContent="center" spacing={2}>
         <Grid item>
-          <CalculatorButton value={'DEL'} text="CLR" variant="delete" onClick={onDelete} />
+          <CalculatorButton value={'CLR'} text="CLR" variant="delete" onClick={onClear} />
         </Grid>
         <Grid item>
-          <CalculatorButton value={'BCK'} text="DEL" variant="back" onClick={onDeleteLast} />
+          <CalculatorButton value={'DEL'} text="DEL" variant="back" onClick={onDeleteLast} />
         </Grid>
         <Grid item>
           <CalculatorButton value={'CON'} text="✔" variant="confirm" onClick={onSubmit} />
