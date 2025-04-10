@@ -7,7 +7,7 @@ interface CalculatorButtonProps {
   onClick?: () => void;
   disabled?: boolean;
   selected?: boolean;
-  variant?: 'number' | 'delete' | 'back' | 'confirm';
+  variant?: 'number' | 'delete' | 'clear' | 'confirm';
 }
 
 export default function CalculatorButton({
@@ -18,20 +18,27 @@ export default function CalculatorButton({
   variant = 'number',
 }: CalculatorButtonProps) {
   const getButtonStyle = () => {
+    let style = {};
+
     switch (variant) {
       case 'delete':
-        return { bgcolor: 'red', color: 'white' };
-      case 'back':
-        return { bgcolor: '#555', color: 'white' };
+        style = { bgcolor: '#555555', color: '#FFFFFF' };
+        break;
+      case 'clear':
+        style = { bgcolor: '#FF0000', color: '#FFFFFF' };
+        break;
       case 'confirm':
-        return { bgcolor: 'green', color: 'white' };
+        style = { bgcolor: '#009900', color: '#FFFFFF' };
+        break;
       default:
-        return {
-          bgcolor: selected ? '#444' : '#777',
-          color: 'white',
-          opacity: disabled ? 0.5 : 1,
-        };
+        style = { bgcolor: '#909090', color: '#FFFFFF' };
     }
+
+    if (selected) {
+      style = { ...style, bgcolor: '#6C6C6C' };
+    }
+
+    return style;
   };
 
   return (
@@ -43,7 +50,7 @@ export default function CalculatorButton({
         fontSize: '1.5rem',
         borderRadius: 2,
         ...getButtonStyle(),
-        '&:hover': { opacity: disabled ? 0.5 : 0.8 },
+        '&:hover': { opacity: disabled ? 1 : 0.8 },
       }}
       onClick={onClick}
       disabled={disabled}

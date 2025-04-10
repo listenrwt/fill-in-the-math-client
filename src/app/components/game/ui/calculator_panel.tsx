@@ -62,10 +62,10 @@ export default function CalculatorPanel({
       </Grid>
       <Grid container justifyContent="center" spacing={2}>
         <Grid item>
-          <CalculatorButton value={'CLR'} text="CLR" variant="delete" onClick={onClear} />
+          <CalculatorButton value={'CLR'} text="CLR" variant="clear" onClick={onClear} />
         </Grid>
         <Grid item>
-          <CalculatorButton value={'DEL'} text="DEL" variant="back" onClick={onDeleteLast} />
+          <CalculatorButton value={'DEL'} text="DEL" variant="delete" onClick={onDeleteLast} />
         </Grid>
         <Grid item>
           <CalculatorButton value={'CON'} text="✔" variant="confirm" onClick={onSubmit} />
