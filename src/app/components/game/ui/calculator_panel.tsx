@@ -1,3 +1,5 @@
+import React, { useCallback, useEffect } from 'react';
+
 import { Box, Grid } from '@mui/material';
 
 import CalculatorButton from './calculator_button';
@@ -17,7 +19,36 @@ export default function CalculatorPanel({
   onSubmit,
   usedNumbers = [],
 }: CalculatorPanelProps) {
-  const isNumberUsed = (num: number) => usedNumbers.includes(num);
+  // Wrap isNumberUsed in useCallback to avoid its reference changing on every render.
+  const isNumberUsed = useCallback((num: number) => usedNumbers.includes(num), [usedNumbers]);
+
+  // Handle keyboard events
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const { key } = event;
+
+      // Handle number keys from 1 to 9
+      if (/^[1-9]$/.test(key)) {
+        const num = parseInt(key, 10);
+        if (!isNumberUsed(num)) {
+          onNumberClick(num);
+        }
+      }
+      // Handle "Enter" key for confirm
+      else if (key === 'Enter') {
+        onSubmit();
+      }
+      // Handle "Backspace" key for delete last
+      else if (key === 'Backspace') {
+        onDeleteLast();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onNumberClick, onSubmit, onDeleteLast, isNumberUsed]);
 
   return (
     <Box sx={{ mt: 2, p: 2, borderRadius: 2 }}>
