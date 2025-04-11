@@ -41,6 +41,7 @@ export default function GameTestPage() {
     disconnectFromServer,
     createRoom,
     joinRoom,
+    quickJoin,
     leaveRoom,
     updateRoomSettings,
     startGame,
@@ -84,6 +85,7 @@ export default function GameTestPage() {
             currentRoom={currentRoom}
             createRoom={createRoom}
             joinRoom={joinRoom}
+            quickJoin={quickJoin}
             leaveRoom={leaveRoom}
             updateRoomSettings={updateRoomSettings}
             startGame={startGame}

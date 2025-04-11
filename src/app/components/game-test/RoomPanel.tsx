@@ -4,12 +4,14 @@ import {
   Box,
   Button,
   FormControl,
+  FormControlLabel,
   Grid,
   InputLabel,
   MenuItem,
   Paper,
   Select,
   SelectChangeEvent,
+  Switch,
   TextField,
   Typography,
 } from '@mui/material';
@@ -32,6 +34,7 @@ interface RoomPanelProps {
   currentRoom: Room | null;
   createRoom: () => void;
   joinRoom: () => void;
+  quickJoin: () => void;
   leaveRoom: () => void;
   updateRoomSettings: () => void;
   startGame?: () => void;
@@ -49,11 +52,25 @@ export const RoomPanel = ({
   currentRoom,
   createRoom,
   joinRoom,
+  quickJoin,
   leaveRoom,
   updateRoomSettings,
   startGame,
   restartGame,
 }: RoomPanelProps) => {
+  // Function to handle public toggle change
+  const handlePublicToggleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Create a synthetic event that matches the format expected by handleRoomConfigChange
+    const syntheticEvent = {
+      target: {
+        name: 'isPublic',
+        value: e.target.checked,
+      },
+    };
+    // Use the object directly as it matches the second type in the union
+    handleRoomConfigChange(syntheticEvent as ChangeEvent<{ name: string; value: boolean }>);
+  };
+
   // If we're in a room, show the room management UI
   if (currentRoom) {
     const isHost = currentRoom.hostId === socketService.getSocket()?.id;
@@ -105,6 +122,21 @@ export const RoomPanel = ({
             <>
               <Grid item xs={12}>
                 <Typography variant="h6">Room Settings</Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={roomConfig.isPublic}
+                      onChange={handlePublicToggleChange}
+                      name="isPublic"
+                    />
+                  }
+                  label="Public Room"
+                />
+                <Typography variant="caption" display="block" gutterBottom>
+                  When enabled, players can join without a room code via Quick Join
+                </Typography>
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
@@ -231,6 +263,21 @@ export const RoomPanel = ({
             />
           </Grid>
           <Grid item xs={12}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={roomConfig.isPublic}
+                  onChange={handlePublicToggleChange}
+                  name="isPublic"
+                />
+              }
+              label="Public Room"
+            />
+            <Typography variant="caption" display="block" gutterBottom>
+              When enabled, players can join without a room code via Quick Join
+            </Typography>
+          </Grid>
+          <Grid item xs={12}>
             <Button
               variant="contained"
               color="primary"
@@ -267,6 +314,25 @@ export const RoomPanel = ({
             >
               Join Room
             </Button>
+          </Grid>
+          <Grid item xs={12}>
+            <Typography variant="subtitle2" align="center" sx={{ mt: 1, mb: 1 }}>
+              OR
+            </Typography>
+          </Grid>
+          <Grid item xs={12}>
+            <Button
+              variant="contained"
+              color="info"
+              onClick={quickJoin}
+              disabled={!username}
+              fullWidth
+            >
+              Quick Join
+            </Button>
+            <Typography variant="caption" display="block" gutterBottom sx={{ mt: 1 }}>
+              Join an available public room without a room code
+            </Typography>
           </Grid>
         </Grid>
       </Box>

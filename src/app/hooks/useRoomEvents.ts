@@ -14,6 +14,7 @@ const DEFAULT_CONFIG: RoomConfig = {
   attackDamage: DEFAULT_ROOM_SETTINGS.ATTACK_DAMAGE,
   healAmount: DEFAULT_ROOM_SETTINGS.HEAL_AMOUNT,
   wrongAnswerPenalty: DEFAULT_ROOM_SETTINGS.WRONG_ANSWER_PENALTY,
+  isPublic: DEFAULT_ROOM_SETTINGS.IS_PUBLIC,
 };
 
 export const useRoomEvents = (isConnected: boolean) => {
@@ -28,10 +29,24 @@ export const useRoomEvents = (isConnected: boolean) => {
     e: ChangeEvent<HTMLInputElement | { name: string; value: unknown }>
   ) => {
     const { name, value } = e.target;
+    const newValue =
+      name === 'questionDifficulty' ? value : name === 'isPublic' ? Boolean(value) : Number(value);
+
     setRoomConfig((prevConfig) => ({
       ...prevConfig,
-      [name]: name === 'questionDifficulty' ? value : Number(value),
+      [name]: newValue,
     }));
+
+    // If we're in a room and the isPublic toggle changes, update room settings immediately
+    if (name === 'isPublic' && currentRoom) {
+      socketService.emit(RoomEvents.UPDATE_SETTINGS, {
+        roomId: currentRoom.id,
+        config: {
+          ...roomConfig,
+          [name]: newValue,
+        },
+      });
+    }
   };
 
   useEffect(() => {
@@ -55,7 +70,12 @@ export const useRoomEvents = (isConnected: boolean) => {
 
     socketService.on<RoomResponse>(RoomEvents.ROOM_UPDATED, (data) => {
       setCurrentRoom(data.room);
+      setRoomConfig(data.room.config);
       setGameMessage('Room settings updated');
+    });
+
+    socketService.on(RoomEvents.NO_ROOMS_AVAILABLE, () => {
+      setGameMessage('No public rooms available. Try creating a room instead!');
     });
 
     return () => {
@@ -63,6 +83,7 @@ export const useRoomEvents = (isConnected: boolean) => {
       socketService.off(RoomEvents.ROOM_JOINED);
       socketService.off(RoomEvents.ROOM_LEFT);
       socketService.off(RoomEvents.ROOM_UPDATED);
+      socketService.off(RoomEvents.NO_ROOMS_AVAILABLE);
     };
   }, [isConnected]);
 
@@ -83,6 +104,14 @@ export const useRoomEvents = (isConnected: boolean) => {
     socketService.emit(RoomEvents.JOIN_ROOM, {
       username,
       roomId: roomIdToJoin,
+    });
+  };
+
+  const quickJoin = () => {
+    if (!isConnected) return;
+
+    socketService.emit(RoomEvents.QUICK_JOIN, {
+      username,
     });
   };
 
@@ -118,6 +147,7 @@ export const useRoomEvents = (isConnected: boolean) => {
     setGameMessage,
     createRoom,
     joinRoom,
+    quickJoin,
     leaveRoom,
     updateRoomSettings,
   };
