@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { generate_text_from_question } from '@/lib/utili';
+
 import { ConnectionEvents, GameEvents } from '../../events/events';
 import {
   AnswerResultResponse,
@@ -21,7 +23,7 @@ export const useGameEvents = () => {
 
   // Game state
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  const [answer, setAnswer] = useState('');
+  const [answer, setAnswer] = useState<number[]>([]);
   const [health, setHealth] = useState<number>(0);
   const [canPerformAction, setCanPerformAction] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -55,13 +57,10 @@ export const useGameEvents = () => {
   const submitAnswer = () => {
     if (!connectionEvents.isConnected || !roomEvents.currentRoom || !currentQuestion) return;
 
-    const numAnswer = Number(answer);
-    if (isNaN(numAnswer)) return;
-
     socketService.emit(GameEvents.SUBMIT_ANSWER, {
       roomId: roomEvents.currentRoom.id,
       questionId: currentQuestion.id,
-      answer: numAnswer,
+      answer: answer,
     });
   };
 
@@ -107,7 +106,11 @@ export const useGameEvents = () => {
 
     socketService.on<QuestionResponse>(GameEvents.QUESTION_RECEIVED, (data) => {
       setCurrentQuestion(data.question);
-      roomEvents.setGameMessage(`New question: ${data.question.text}`);
+      // Reset answer array when receiving a new question
+      setAnswer([]);
+      roomEvents.setGameMessage(
+        `New question: ${generate_text_from_question(data.question.equation_arr)}`
+      );
     });
 
     socketService.on<AnswerResultResponse>(GameEvents.ANSWER_RESULT, (data) => {
@@ -115,10 +118,10 @@ export const useGameEvents = () => {
         roomEvents.setGameMessage('Correct! Choose an action.');
         setCanPerformAction(true);
       } else {
-        roomEvents.setGameMessage(`Wrong! Correct answer: ${data.correctAnswer}`);
+        roomEvents.setGameMessage(`Wrong!`);
         getQuestion();
       }
-      setAnswer('');
+      setAnswer([]);
     });
 
     socketService.on<HealthUpdateResponse>(GameEvents.HEALTH_UPDATED, (data) => {
@@ -168,6 +171,7 @@ export const useGameEvents = () => {
     socketService.on(GameEvents.GAME_ENDED, () => {
       setCurrentQuestion(null);
       setCanPerformAction(false);
+      setAnswer([]); // Reset answer array when game ends
 
       // Update the currentRoom state to reflect that the game has ended
       roomEvents.setCurrentRoom((prevRoom) => {
@@ -198,6 +202,7 @@ export const useGameEvents = () => {
       setCurrentQuestion(null);
       setCanPerformAction(false);
       setLeaderboard([]);
+      setAnswer([]); // Reset answer array when disconnecting
     }
   }, [connectionEvents.isConnected]);
 

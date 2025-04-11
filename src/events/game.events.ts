@@ -12,7 +12,7 @@ export interface GetQuestionRequest extends BaseSocketMessage {
 export interface SubmitAnswerRequest extends BaseSocketMessage {
   roomId: string;
   questionId: string;
-  answer: number;
+  answer: number[];
 }
 
 export interface PerformActionRequest extends BaseSocketMessage {

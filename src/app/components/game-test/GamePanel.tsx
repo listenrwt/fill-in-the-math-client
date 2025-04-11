@@ -1,14 +1,17 @@
-import { Box, Button, Card, CardContent, Grid, Paper, TextField, Typography } from '@mui/material';
+import { JSX } from 'react';
 
-import { Question, Room } from '../../../lib/game.types';
-import socketService from '../../../services/socket.service';
+import { Box, Button, Card, CardContent, Grid, Paper, Typography } from '@mui/material';
+
+import { Question, Room } from '@/lib/game.types';
+import { MathSymbol } from '@/lib/question.enum';
+import socketService from '@/services/socket.service';
 
 interface GamePanelProps {
   currentRoom: Room;
   health: number;
   currentQuestion: Question | null;
-  answer: string;
-  setAnswer: (answer: string) => void;
+  answer: number[];
+  setAnswer: (answer: number[]) => void;
   canPerformAction: boolean;
   submitAnswer: () => void;
   performHeal: () => void;
@@ -26,6 +29,154 @@ export const GamePanel = ({
   performHeal,
   performAttack,
 }: GamePanelProps) => {
+  // Count the number of blanks in the equation
+  const countBlanks = (equation_arr: (number | MathSymbol)[] | undefined): number => {
+    if (!equation_arr) return 0;
+    return equation_arr.filter((item) => item === MathSymbol.Blank).length;
+  };
+
+  // Handle number pad button click
+  const handleNumberClick = (num: number) => {
+    // Check if this number is already used
+    if (answer.includes(num)) return;
+
+    // Add the number to the answer array
+    const newAnswer = [...answer, num];
+    setAnswer(newAnswer);
+  };
+
+  // Handle delete button click
+  const handleDelete = () => {
+    // Remove the last number
+    const newAnswer = [...answer];
+    newAnswer.pop();
+    setAnswer(newAnswer);
+  };
+
+  // Handle clear button click
+  const handleClear = () => {
+    setAnswer([]);
+  };
+
+  // Render the equation with blanks showing current answer
+  const renderEquation = () => {
+    if (!currentQuestion) return null;
+
+    const parts: JSX.Element[] = [];
+    let answerIndex = 0;
+
+    currentQuestion.equation_arr.forEach((item, index) => {
+      if (item === MathSymbol.Blank) {
+        // Render the blank with the current answer if available
+        const answerValue =
+          answer[answerIndex] !== undefined ? answer[answerIndex].toString() : '_';
+        parts.push(
+          <Typography
+            key={`blank-${index}`}
+            component="span"
+            variant="h4"
+            sx={{
+              fontFamily: 'monospace',
+              mx: 1,
+              px: 2,
+              py: 1,
+              bgcolor: 'primary.light',
+              borderRadius: 1,
+              color: 'primary.contrastText',
+            }}
+          >
+            {answerValue}
+          </Typography>
+        );
+        answerIndex++;
+      } else {
+        // Render the normal character
+        parts.push(
+          <Typography
+            key={`char-${index}`}
+            component="span"
+            variant="h4"
+            sx={{ fontFamily: 'monospace' }}
+          >
+            {item}
+          </Typography>
+        );
+      }
+    });
+
+    return (
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', mb: 3 }}>{parts}</Box>
+    );
+  };
+
+  // Render the number pad
+  const renderNumberPad = () => {
+    const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    const maxSelections = currentQuestion ? countBlanks(currentQuestion.equation_arr) : 0;
+
+    return (
+      <Box sx={{ mb: 3 }}>
+        <Grid container spacing={1} sx={{ mb: 2 }}>
+          {numbers.map((num) => (
+            <Grid item xs={4} key={num}>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                disabled={
+                  answer.includes(num) || answer.length >= maxSelections || canPerformAction
+                }
+                onClick={() => handleNumberClick(num)}
+                sx={{ height: '50px', fontSize: '1.5rem' }}
+              >
+                {num}
+              </Button>
+            </Grid>
+          ))}
+        </Grid>
+
+        <Grid container spacing={1}>
+          <Grid item xs={4}>
+            <Button
+              variant="outlined"
+              color="error"
+              fullWidth
+              onClick={handleClear}
+              disabled={answer.length === 0 || canPerformAction}
+              sx={{ height: '50px' }}
+            >
+              Clear
+            </Button>
+          </Grid>
+          <Grid item xs={4}>
+            <Button
+              variant="outlined"
+              color="warning"
+              fullWidth
+              onClick={handleDelete}
+              disabled={answer.length === 0 || canPerformAction}
+              sx={{ height: '50px' }}
+            >
+              Delete
+            </Button>
+          </Grid>
+          <Grid item xs={4}>
+            <Button
+              variant="contained"
+              color="success"
+              fullWidth
+              onClick={submitAnswer}
+              disabled={answer.length < maxSelections || canPerformAction}
+              sx={{ height: '50px' }}
+            >
+              Submit
+            </Button>
+          </Grid>
+        </Grid>
+      </Box>
+    );
+  };
+
   return (
     <Paper sx={{ p: 2, mb: 3 }}>
       <Typography variant="h5" gutterBottom>
@@ -80,33 +231,17 @@ export const GamePanel = ({
         <Box sx={{ mb: 3 }}>
           <Card sx={{ mb: 2, bgcolor: 'info.light', color: 'info.contrastText' }}>
             <CardContent>
-              <Typography variant="h5">Question: {currentQuestion.text}</Typography>
+              <Typography variant="h5" gutterBottom>
+                Question:
+              </Typography>
+              {renderEquation()}
+              <Typography variant="body2">
+                Fill in the blanks with numbers 1-9. Each number can only be used once.
+              </Typography>
             </CardContent>
           </Card>
 
-          <Grid container spacing={2}>
-            <Grid item xs={8}>
-              <TextField
-                fullWidth
-                label="Your Answer"
-                type="number"
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                disabled={canPerformAction}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={submitAnswer}
-                fullWidth
-                disabled={canPerformAction || answer === ''}
-              >
-                Submit
-              </Button>
-            </Grid>
-          </Grid>
+          {renderNumberPad()}
         </Box>
       ) : null}
 
