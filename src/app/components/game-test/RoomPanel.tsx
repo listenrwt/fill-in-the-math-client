@@ -14,8 +14,9 @@ import {
   Typography,
 } from '@mui/material';
 
-import socketService from '../../../services/socket.service';
-import { QuestionDifficulty, Room, RoomConfig, RoomStatus } from '../../../types/game.types';
+import { Room, RoomConfig, RoomStatus } from '@/lib/game.types';
+import { Difficulty } from '@/lib/question.enum';
+import socketService from '@/services/socket.service';
 
 interface RoomPanelProps {
   username: string;
@@ -124,9 +125,9 @@ export const RoomPanel = ({
                     name="questionDifficulty"
                     onChange={handleRoomConfigChange as (e: SelectChangeEvent) => void}
                   >
-                    <MenuItem value={QuestionDifficulty.EASY}>Easy</MenuItem>
-                    <MenuItem value={QuestionDifficulty.MEDIUM}>Medium</MenuItem>
-                    <MenuItem value={QuestionDifficulty.HARD}>Hard</MenuItem>
+                    <MenuItem value={Difficulty.EASY}>Easy</MenuItem>
+                    <MenuItem value={Difficulty.MEDIUM}>Medium</MenuItem>
+                    <MenuItem value={Difficulty.HARD}>Hard</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>

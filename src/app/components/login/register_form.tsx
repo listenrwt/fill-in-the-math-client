@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
+//import { useRouter } from 'next/navigation';
 
 import { Box, Button, TextField, Typography } from '@mui/material';
 
@@ -27,12 +29,17 @@ import { Box, Button, TextField, Typography } from '@mui/material';
  * After successful registration, the user is redirected to the login page.
  */
 export default function RegisterForm() {
-  const router = useRouter(); // Initialize the router
+  // const router = useRouter(); // Initialize the router
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  /* Need to implement later:
+  1. Email system
+  2. Check Username availability
+  3. if failed to register, stop the Link to /login
+  */
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
@@ -40,12 +47,12 @@ export default function RegisterForm() {
       return;
     }
     console.log('Registering with:', { username, password });
-    router.push('/login');
+    // router.push('/login');
   };
 
   const switchToLogin = () => {
     console.log('Switching to login...');
-    router.push('/login');
+    //router.push('/login');
   };
 
   return (
@@ -73,7 +80,7 @@ export default function RegisterForm() {
           variant="filled"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: 'white' }, mb: 2 }}
+          sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: '#000000' }, mb: 2 }}
           InputLabelProps={{ style: { color: '#262626' } }}
         />
         <TextField
@@ -82,7 +89,7 @@ export default function RegisterForm() {
           variant="filled"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: 'white' }, mb: 2 }}
+          sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: '#000000' }, mb: 2 }}
           InputLabelProps={{ style: { color: '#262626' } }}
         />
         <TextField
@@ -92,7 +99,7 @@ export default function RegisterForm() {
           variant="filled"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: 'white' }, mb: 2 }}
+          sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: '#000000' }, mb: 2 }}
           InputLabelProps={{ style: { color: '#262626' } }}
         />
         <TextField
@@ -102,30 +109,34 @@ export default function RegisterForm() {
           variant="filled"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: 'white' }, mb: 2 }}
+          sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: '#000000' }, mb: 2 }}
           InputLabelProps={{ style: { color: '#262626' } }}
         />
-        <Button
-          fullWidth
-          type="submit"
-          variant="contained"
-          sx={{
-            bgcolor: '#262626',
-            color: '#B3B3B3',
-            '&:hover': { bgcolor: '#1E1E1E', color: 'white' },
-            py: 1.5,
-            fontWeight: 'bold',
-          }}
-        >
-          Register
-        </Button>
+        <Link href={{ pathname: '/login' }}>
+          <Button
+            fullWidth
+            type="submit"
+            variant="contained"
+            sx={{
+              bgcolor: '#262626',
+              color: '#B3B3B3',
+              '&:hover': { bgcolor: '#1E1E1E', color: 'white' },
+              py: 1.5,
+              fontWeight: 'bold',
+            }}
+          >
+            Register
+          </Button>
+        </Link>
       </form>
-      <Button
-        onClick={switchToLogin}
-        sx={{ mt: 2, fontSize: '0.875rem', color: 'blue', textTransform: 'none' }}
-      >
-        Already have an account? Login
-      </Button>
+      <Link href={{ pathname: '/login' }}>
+        <Button
+          onClick={switchToLogin}
+          sx={{ mt: 2, fontSize: '0.875rem', color: 'blue', textTransform: 'none' }}
+        >
+          Already have an account? Login
+        </Button>
+      </Link>
     </Box>
   );
 }

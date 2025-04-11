@@ -3,8 +3,8 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import { RoomEvents } from '../../events/events';
 import { RoomResponse } from '../../events/room.events';
 import { DEFAULT_ROOM_SETTINGS } from '../../lib/const';
+import { Room, RoomConfig } from '../../lib/game.types';
 import socketService from '../../services/socket.service';
-import { Room, RoomConfig } from '../../types/game.types';
 
 // Create a default config to avoid undefined issues
 const DEFAULT_CONFIG: RoomConfig = {

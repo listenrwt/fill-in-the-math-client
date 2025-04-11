@@ -3,7 +3,7 @@
 import { Container, Typography } from '@mui/material';
 
 import { useGameEvents } from '../../app/hooks/useGameEvents';
-import { RoomStatus } from '../../types/game.types';
+import { RoomStatus } from '../../lib/game.types';
 import { ConnectionPanel } from '../components/game-test/ConnectionPanel';
 import { GamePanel } from '../components/game-test/GamePanel';
 import { LeaderboardPanel } from '../components/game-test/LeaderboardPanel';

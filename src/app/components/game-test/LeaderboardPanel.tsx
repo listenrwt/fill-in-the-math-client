@@ -1,6 +1,6 @@
 import { Box, Paper, Typography } from '@mui/material';
 
-import { LeaderboardEntry } from '@/types/game.types';
+import { LeaderboardEntry } from '@/lib/game.types';
 
 import socketService from '../../../services/socket.service';
 

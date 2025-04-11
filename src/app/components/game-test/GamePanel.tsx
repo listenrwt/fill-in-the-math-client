@@ -2,9 +2,9 @@ import { JSX } from 'react';
 
 import { Box, Button, Card, CardContent, Grid, Paper, Typography } from '@mui/material';
 
-import socketService from '../../../services/socket.service';
-import { Question, Room } from '../../../types/game.types';
-import { MathSymbol } from '../../../types/game.types';
+import { Question, Room } from '@/lib/game.types';
+import { MathSymbol } from '@/lib/question.enum';
+import socketService from '@/services/socket.service';
 
 interface GamePanelProps {
   currentRoom: Room;

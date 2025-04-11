@@ -1,4 +1,4 @@
-import { BaseSocketMessage, Room, RoomConfig } from '../types/game.types';
+import { BaseSocketMessage, Room, RoomConfig } from '../lib/game.types';
 
 // Request payloads
 export interface CreateRoomRequest extends BaseSocketMessage {

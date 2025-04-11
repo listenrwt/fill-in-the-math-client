@@ -11,8 +11,8 @@ import {
   QuestionResponse,
 } from '../../events/game.events';
 import { ErrorResponse, RoomResponse } from '../../events/room.events';
+import { ActionType, LeaderboardEntry, Question, RoomStatus } from '../../lib/game.types';
 import socketService from '../../services/socket.service';
-import { ActionType, LeaderboardEntry, Question, RoomStatus } from '../../types/game.types';
 import { useConnectionEvents } from './useConnectionEvents';
 import { useRoomEvents } from './useRoomEvents';
 

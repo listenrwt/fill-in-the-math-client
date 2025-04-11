@@ -1,4 +1,4 @@
-import { MathSymbol } from '@/types/game.types';
+import { MathSymbol } from './question.enum';
 
 export function generate_text_from_question(equation_arr: (number | MathSymbol)[]) {
   let text = '';
