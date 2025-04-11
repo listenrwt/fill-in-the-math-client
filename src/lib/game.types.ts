@@ -14,6 +14,7 @@ export interface RoomConfig {
   attackDamage: number;
   healAmount: number;
   wrongAnswerPenalty: number;
+  isPublic: boolean;
 }
 
 export interface Room {

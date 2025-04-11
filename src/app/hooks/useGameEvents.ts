@@ -17,9 +17,30 @@ import { useConnectionEvents } from './useConnectionEvents';
 import { useRoomEvents } from './useRoomEvents';
 
 export const useGameEvents = () => {
-  // Use connection and room hooks
-  const connectionEvents = useConnectionEvents();
-  const roomEvents = useRoomEvents(connectionEvents.isConnected);
+  // Connection state from useConnectionEvents
+  const { isConnected, serverUrl, setServerUrl, connectToServer, disconnectFromServer } =
+    useConnectionEvents();
+
+  // Room state from useRoomEvents
+  const {
+    username,
+    setUsername,
+    roomName,
+    setRoomName,
+    roomIdToJoin,
+    setRoomIdToJoin,
+    roomConfig,
+    handleRoomConfigChange,
+    currentRoom,
+    gameMessage,
+    setCurrentRoom,
+    setGameMessage,
+    createRoom,
+    joinRoom,
+    quickJoin,
+    leaveRoom,
+    updateRoomSettings,
+  } = useRoomEvents(isConnected);
 
   // Game state
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
@@ -30,45 +51,45 @@ export const useGameEvents = () => {
 
   // Game actions
   const startGame = () => {
-    if (!connectionEvents.isConnected || !roomEvents.currentRoom) return;
+    if (!isConnected || !currentRoom) return;
 
     socketService.emit(GameEvents.START_GAME, {
-      roomId: roomEvents.currentRoom.id,
+      roomId: currentRoom.id,
     });
   };
 
   const restartGame = () => {
-    if (!connectionEvents.isConnected || !roomEvents.currentRoom) return;
+    if (!isConnected || !currentRoom) return;
 
     // Use the existing START_GAME event to restart the game
     socketService.emit(GameEvents.START_GAME, {
-      roomId: roomEvents.currentRoom.id,
+      roomId: currentRoom.id,
     });
   };
 
   const getQuestion = useCallback(() => {
-    if (!connectionEvents.isConnected || !roomEvents.currentRoom) return;
+    if (!isConnected || !currentRoom) return;
 
     socketService.emit(GameEvents.GET_QUESTION, {
-      roomId: roomEvents.currentRoom.id,
+      roomId: currentRoom.id,
     });
-  }, [connectionEvents.isConnected, roomEvents.currentRoom]);
+  }, [isConnected, currentRoom]);
 
   const submitAnswer = () => {
-    if (!connectionEvents.isConnected || !roomEvents.currentRoom || !currentQuestion) return;
+    if (!isConnected || !currentRoom || !currentQuestion) return;
 
     socketService.emit(GameEvents.SUBMIT_ANSWER, {
-      roomId: roomEvents.currentRoom.id,
+      roomId: currentRoom.id,
       questionId: currentQuestion.id,
       answer: answer,
     });
   };
 
   const performAttack = (targetId: string) => {
-    if (!connectionEvents.isConnected || !roomEvents.currentRoom || !canPerformAction) return;
+    if (!isConnected || !currentRoom || !canPerformAction) return;
 
     socketService.emit(GameEvents.PERFORM_ACTION, {
-      roomId: roomEvents.currentRoom.id,
+      roomId: currentRoom.id,
       actionType: ActionType.ATTACK,
       targetPlayerId: targetId,
     });
@@ -77,10 +98,10 @@ export const useGameEvents = () => {
   };
 
   const performHeal = () => {
-    if (!connectionEvents.isConnected || !roomEvents.currentRoom || !canPerformAction) return;
+    if (!isConnected || !currentRoom || !canPerformAction) return;
 
     socketService.emit(GameEvents.PERFORM_ACTION, {
-      roomId: roomEvents.currentRoom.id,
+      roomId: currentRoom.id,
       actionType: ActionType.HEAL,
       targetPlayerId: socketService.getSocket()?.id || '',
     });
@@ -90,17 +111,17 @@ export const useGameEvents = () => {
 
   // Setup event listeners when connected
   useEffect(() => {
-    if (!connectionEvents.isConnected) return;
+    if (!isConnected) return;
 
     // Setup socket event listeners
     socketService.on<ErrorResponse>(ConnectionEvents.ERROR, (data) => {
-      roomEvents.setGameMessage(`Error: ${data.error}`);
+      setGameMessage(`Error: ${data.error}`);
     });
 
     socketService.on<RoomResponse>(GameEvents.GAME_STARTED, (data) => {
-      roomEvents.setCurrentRoom(data.room);
+      setCurrentRoom(data.room);
       setHealth(data.room.config.timeLimit);
-      roomEvents.setGameMessage('Game started!');
+      setGameMessage('Game started!');
       getQuestion();
     });
 
@@ -108,17 +129,15 @@ export const useGameEvents = () => {
       setCurrentQuestion(data.question);
       // Reset answer array when receiving a new question
       setAnswer([]);
-      roomEvents.setGameMessage(
-        `New question: ${generate_text_from_question(data.question.equation_arr)}`
-      );
+      setGameMessage(`New question: ${generate_text_from_question(data.question.equation_arr)}`);
     });
 
     socketService.on<AnswerResultResponse>(GameEvents.ANSWER_RESULT, (data) => {
       if (data.correct) {
-        roomEvents.setGameMessage('Correct! Choose an action.');
+        setGameMessage('Correct! Choose an action.');
         setCanPerformAction(true);
       } else {
-        roomEvents.setGameMessage(`Wrong!`);
+        setGameMessage(`Wrong!`);
         getQuestion();
       }
       setAnswer([]);
@@ -134,7 +153,7 @@ export const useGameEvents = () => {
       });
 
       // Always update all players' health in the current room state
-      roomEvents.setCurrentRoom((prevRoom) => {
+      setCurrentRoom((prevRoom) => {
         if (!prevRoom) return prevRoom;
 
         // Create a new room object with updated players array
@@ -153,18 +172,18 @@ export const useGameEvents = () => {
 
     socketService.on<PlayerEliminatedResponse>(GameEvents.PLAYER_ELIMINATED, (data) => {
       if (socketService.getSocket()?.id === data.playerId) {
-        roomEvents.setGameMessage('You have been eliminated!');
+        setGameMessage('You have been eliminated!');
       } else {
-        roomEvents.setGameMessage(`Player ${data.playerId} has been eliminated!`);
+        setGameMessage(`Player ${data.playerId} has been eliminated!`);
       }
     });
 
     socketService.on<LeaderboardResponse>(GameEvents.LEADERBOARD_UPDATED, (data) => {
       setLeaderboard(data.leaderboard);
       if (data.gameWinner) {
-        roomEvents.setGameMessage(`Game over! Winner: ${data.gameWinner}`);
+        setGameMessage(`Game over! Winner: ${data.gameWinner}`);
       } else {
-        roomEvents.setGameMessage("Game over! It's a tie!");
+        setGameMessage("Game over! It's a tie!");
       }
     });
 
@@ -174,7 +193,7 @@ export const useGameEvents = () => {
       setAnswer([]); // Reset answer array when game ends
 
       // Update the currentRoom state to reflect that the game has ended
-      roomEvents.setCurrentRoom((prevRoom) => {
+      setCurrentRoom((prevRoom) => {
         if (!prevRoom) return prevRoom;
         return {
           ...prevRoom,
@@ -194,38 +213,53 @@ export const useGameEvents = () => {
       socketService.off(GameEvents.LEADERBOARD_UPDATED);
       socketService.off(GameEvents.GAME_ENDED);
     };
-  }, [connectionEvents.isConnected, roomEvents, getQuestion]);
+  }, [isConnected, setGameMessage, setCurrentRoom, getQuestion]);
 
   // Reset game state when disconnecting
   useEffect(() => {
-    if (!connectionEvents.isConnected) {
+    if (!isConnected) {
       setCurrentQuestion(null);
       setCanPerformAction(false);
       setLeaderboard([]);
       setAnswer([]); // Reset answer array when disconnecting
     }
-  }, [connectionEvents.isConnected]);
+  }, [isConnected]);
 
   // Combine all hooks' return values
   return {
-    // Connection state and methods
-    ...connectionEvents,
-
-    // Room state and methods
-    ...roomEvents,
-
-    // Game-specific state
+    // State
+    isConnected,
+    serverUrl,
+    username,
+    roomName,
+    roomIdToJoin,
+    roomConfig,
+    currentRoom,
     currentQuestion,
     answer,
-    setAnswer,
+    gameMessage,
     health,
     canPerformAction,
     leaderboard,
 
-    // Game actions
+    // State setters
+    setServerUrl,
+    setUsername,
+    setRoomName,
+    setRoomIdToJoin,
+    handleRoomConfigChange,
+    setAnswer,
+
+    // Actions
+    createRoom,
+    joinRoom,
+    quickJoin,
+    leaveRoom,
+    updateRoomSettings,
+    connectToServer,
+    disconnectFromServer,
     startGame,
     restartGame,
-    getQuestion,
     submitAnswer,
     performAttack,
     performHeal,
