@@ -1,16 +1,29 @@
-import { Box, Paper, Typography } from '@mui/material';
+import { Box, Button, Grid, Paper, Typography } from '@mui/material';
 
-import { LeaderboardEntry } from '@/lib/game.types';
+import { LeaderboardEntry, Room } from '@/lib/game.types';
 
 import socketService from '../../../services/socket.service';
 
 interface LeaderboardPanelProps {
   leaderboard: LeaderboardEntry[];
+  currentRoom: Room | null;
+  leaveRoom: () => void;
+  deleteRoom?: () => void;
+  continueGame?: () => void;
 }
 
-export const LeaderboardPanel = ({ leaderboard }: LeaderboardPanelProps) => {
+export const LeaderboardPanel = ({
+  leaderboard,
+  currentRoom,
+  leaveRoom,
+  deleteRoom,
+  continueGame,
+}: LeaderboardPanelProps) => {
   // Check if there's a tie (multiple players with rank 1)
   const hasTie = leaderboard.filter((entry) => entry.rank === 1).length > 1;
+
+  // Check if the current user is the host of the room
+  const isHost = currentRoom?.hostId === socketService.getSocket()?.id;
 
   return (
     <Paper sx={{ p: 2, mb: 3 }}>
@@ -24,7 +37,7 @@ export const LeaderboardPanel = ({ leaderboard }: LeaderboardPanelProps) => {
         </Typography>
       )}
 
-      <Box component="table" sx={{ width: '100%' }}>
+      <Box component="table" sx={{ width: '100%', mb: 2 }}>
         <Box component="thead">
           <Box component="tr" sx={{ '& th': { p: 1, textAlign: 'left' } }}>
             <Box component="th">Rank</Box>
@@ -53,6 +66,35 @@ export const LeaderboardPanel = ({ leaderboard }: LeaderboardPanelProps) => {
           ))}
         </Box>
       </Box>
+
+      {/* Action buttons based on user role */}
+      <Grid container spacing={2} sx={{ mt: 2 }}>
+        {isHost ? (
+          <>
+            <Grid item>
+              <Button variant="contained" color="primary" onClick={continueGame}>
+                Continue
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button variant="contained" color="error" onClick={leaveRoom}>
+                Leave Room
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button variant="contained" color="warning" onClick={deleteRoom}>
+                Delete Room
+              </Button>
+            </Grid>
+          </>
+        ) : (
+          <Grid item>
+            <Button variant="contained" color="error" onClick={leaveRoom}>
+              Leave Room
+            </Button>
+          </Grid>
+        )}
+      </Grid>
     </Paper>
   );
 };

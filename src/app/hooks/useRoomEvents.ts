@@ -68,6 +68,11 @@ export const useRoomEvents = (isConnected: boolean) => {
       setGameMessage('Left room');
     });
 
+    socketService.on(RoomEvents.ROOM_DELETED, () => {
+      setCurrentRoom(null);
+      setGameMessage('Room has been deleted');
+    });
+
     socketService.on<RoomResponse>(RoomEvents.ROOM_UPDATED, (data) => {
       setCurrentRoom(data.room);
       setGameMessage('Room settings updated');
@@ -81,6 +86,7 @@ export const useRoomEvents = (isConnected: boolean) => {
       socketService.off(RoomEvents.ROOM_CREATED);
       socketService.off(RoomEvents.ROOM_JOINED);
       socketService.off(RoomEvents.ROOM_LEFT);
+      socketService.off(RoomEvents.ROOM_DELETED);
       socketService.off(RoomEvents.ROOM_UPDATED);
       socketService.off(RoomEvents.NO_ROOMS_AVAILABLE);
     };
@@ -122,6 +128,22 @@ export const useRoomEvents = (isConnected: boolean) => {
     });
   };
 
+  const deleteRoom = () => {
+    if (!isConnected || !currentRoom) return;
+
+    socketService.emit(RoomEvents.DELETE_ROOM, {
+      roomId: currentRoom.id,
+    });
+  };
+
+  const continueGame = () => {
+    if (!isConnected || !currentRoom) return;
+
+    socketService.emit(RoomEvents.CONTINUE_GAME, {
+      roomId: currentRoom.id,
+    });
+  };
+
   const updateRoomSettings = () => {
     if (!isConnected || !currentRoom) return;
 
@@ -148,6 +170,8 @@ export const useRoomEvents = (isConnected: boolean) => {
     joinRoom,
     quickJoin,
     leaveRoom,
+    deleteRoom,
+    continueGame,
     updateRoomSettings,
   };
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import { Container, Typography } from '@mui/material';
+import { Container, Grid, Typography } from '@mui/material';
 
 import { useGameEvents } from '../../app/hooks/useGameEvents';
 import { RoomStatus } from '../../lib/game.types';
@@ -43,13 +43,19 @@ export default function GameTestPage() {
     joinRoom,
     quickJoin,
     leaveRoom,
+    deleteRoom,
+    continueGame,
     updateRoomSettings,
     startGame,
-    restartGame,
     submitAnswer,
     performAttack,
     performHeal,
   } = useGameEvents();
+
+  // Determine the current game state
+  const isInRoom = !!currentRoom;
+  const isPlaying = isInRoom && currentRoom.status === RoomStatus.IN_PROGRESS;
+  const isFinished = isInRoom && currentRoom.status === RoomStatus.FINISHED;
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -66,52 +72,69 @@ export default function GameTestPage() {
       />
 
       {isConnected && (
-        <>
-          <PlayerInfoPanel
-            username={username}
-            setUsername={setUsername}
-            currentRoom={currentRoom}
-          />
-
-          <RoomPanel
-            username={username}
-            setUsername={setUsername}
-            roomName={roomName}
-            setRoomName={setRoomName}
-            roomConfig={roomConfig}
-            handleRoomConfigChange={handleRoomConfigChange}
-            roomIdToJoin={roomIdToJoin}
-            setRoomIdToJoin={setRoomIdToJoin}
-            currentRoom={currentRoom}
-            createRoom={createRoom}
-            joinRoom={joinRoom}
-            quickJoin={quickJoin}
-            leaveRoom={leaveRoom}
-            updateRoomSettings={updateRoomSettings}
-            startGame={startGame}
-            restartGame={restartGame}
-          />
-
-          {currentRoom && currentRoom.status === RoomStatus.IN_PROGRESS && (
-            <GamePanel
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={4}>
+            <PlayerInfoPanel
+              username={username}
+              setUsername={setUsername}
               currentRoom={currentRoom}
-              health={health}
-              currentQuestion={currentQuestion}
-              answer={answer}
-              setAnswer={setAnswer}
-              canPerformAction={canPerformAction}
-              submitAnswer={submitAnswer}
-              performHeal={performHeal}
-              performAttack={performAttack}
             />
+          </Grid>
+
+          {!isPlaying && !isFinished && (
+            <Grid item xs={12}>
+              <RoomPanel
+                username={username}
+                setUsername={setUsername}
+                roomName={roomName}
+                setRoomName={setRoomName}
+                roomConfig={roomConfig}
+                handleRoomConfigChange={handleRoomConfigChange}
+                roomIdToJoin={roomIdToJoin}
+                setRoomIdToJoin={setRoomIdToJoin}
+                currentRoom={currentRoom}
+                createRoom={createRoom}
+                joinRoom={joinRoom}
+                quickJoin={quickJoin}
+                leaveRoom={leaveRoom}
+                updateRoomSettings={updateRoomSettings}
+                startGame={startGame}
+              />
+            </Grid>
           )}
 
-          {currentRoom && currentRoom.status === RoomStatus.FINISHED && (
-            <LeaderboardPanel leaderboard={leaderboard} />
+          {isPlaying && currentRoom && (
+            <Grid item xs={12}>
+              <GamePanel
+                currentRoom={currentRoom}
+                health={health}
+                currentQuestion={currentQuestion}
+                answer={answer}
+                setAnswer={setAnswer}
+                canPerformAction={canPerformAction}
+                submitAnswer={submitAnswer}
+                performHeal={performHeal}
+                performAttack={performAttack}
+              />
+            </Grid>
           )}
 
-          <MessagePanel gameMessage={gameMessage} />
-        </>
+          {isFinished && (
+            <Grid item xs={12}>
+              <LeaderboardPanel
+                leaderboard={leaderboard}
+                currentRoom={currentRoom}
+                leaveRoom={leaveRoom}
+                deleteRoom={deleteRoom}
+                continueGame={continueGame}
+              />
+            </Grid>
+          )}
+
+          <Grid item xs={12}>
+            <MessagePanel gameMessage={gameMessage} />
+          </Grid>
+        </Grid>
       )}
     </Container>
   );
