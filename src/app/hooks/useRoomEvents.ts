@@ -70,7 +70,6 @@ export const useRoomEvents = (isConnected: boolean) => {
 
     socketService.on<RoomResponse>(RoomEvents.ROOM_UPDATED, (data) => {
       setCurrentRoom(data.room);
-      setRoomConfig(data.room.config);
       setGameMessage('Room settings updated');
     });
 
