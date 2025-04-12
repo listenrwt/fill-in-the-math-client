@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { Avatar, Box, Button, Card, CardContent, Grid2, Typography } from '@mui/material';
 import io, { Socket } from 'socket.io-client';
 
-import Stroke from './stroke';
+import Stroke from '../stroke';
 
 // Define a simple Player interface
 interface Player {

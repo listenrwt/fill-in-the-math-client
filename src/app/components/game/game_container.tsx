@@ -5,9 +5,9 @@ import { Box, Typography } from '@mui/material';
 import { MathSymbol } from '@/lib/question.enum';
 import { Question } from '@/lib/question.types';
 
-import CalculatorDisplay from './ui/calculator_display';
-import CalculatorPanel from './ui/calculator_panel';
-import GameAction from './ui/game_action';
+import GameAction from './ui/action/game_action';
+import CalculatorDisplay from './ui/calculator/calculator_display';
+import CalculatorPanel from './ui/calculator/calculator_panel';
 import Stroke from './ui/stroke';
 
 export default function GameContainer() {
