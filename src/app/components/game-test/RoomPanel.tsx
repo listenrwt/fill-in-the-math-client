@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useEffect, useRef } from 'react';
 
 import {
   Box,
@@ -56,8 +56,14 @@ export const RoomPanel = ({
   updateRoomSettings,
   startGame,
 }: RoomPanelProps) => {
+  // Use a ref to track if the change was initiated by the user
+  const userInitiatedChange = useRef(false);
+
   // Function to handle public toggle change
   const handlePublicToggleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Flag that this change was initiated by user action
+    userInitiatedChange.current = true;
+
     // Create a synthetic event that matches the format expected by handleRoomConfigChange
     const syntheticEvent = {
       target: {
@@ -68,6 +74,26 @@ export const RoomPanel = ({
     // Use the object directly as it matches the second type in the union
     handleRoomConfigChange(syntheticEvent as ChangeEvent<{ name: string; value: boolean }>);
   };
+
+  // Effect to ensure roomConfig stays in sync with currentRoom config
+  // but only when not modified by the user
+  useEffect(() => {
+    if (currentRoom && !userInitiatedChange.current) {
+      // Only sync from server when the values differ and it's not a user-initiated change
+      if (roomConfig.isPublic !== currentRoom.config.isPublic) {
+        const syntheticEvent = {
+          target: {
+            name: 'isPublic',
+            value: currentRoom.config.isPublic,
+          },
+        };
+        handleRoomConfigChange(syntheticEvent as ChangeEvent<{ name: string; value: boolean }>);
+      }
+    }
+
+    // Reset the flag after each render
+    userInitiatedChange.current = false;
+  }, [currentRoom, roomConfig.isPublic, handleRoomConfigChange]);
 
   // If we're in a room, show the room management UI
   if (currentRoom) {

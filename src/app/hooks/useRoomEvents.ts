@@ -122,7 +122,7 @@ export const useRoomEvents = (isConnected: boolean) => {
 
   const leaveRoom = () => {
     if (!isConnected || !currentRoom) return;
-
+    updateRoomSettings();
     socketService.emit(RoomEvents.LEAVE_ROOM, {
       roomId: currentRoom.id,
     });
