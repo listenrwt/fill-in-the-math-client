@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Grid2 } from '@mui/material';
 
 import { MathSymbol } from '@/lib/question.enum';
-import { Question } from '@/lib/question.types';
+import { Equation } from '@/lib/question.types';
 
 import CalculatorDisplay from './ui/calculator_display';
 import CalculatorPanel from './ui/calculator_panel';
@@ -13,7 +13,7 @@ import InGameTimer from './ui/in_game_timer';
 // TODO: Implement the GameContainer component, create more components if needed
 export default function GameContainer() {
   // Initial question with multiple blanks
-  const initialQuestion: Question = [
+  const initialQuestion: Equation = [
     MathSymbol.Blank, // First blank
     MathSymbol.Addition,
     2,
@@ -24,7 +24,7 @@ export default function GameContainer() {
   ];
 
   // State to store the question
-  const [question, setQuestion] = useState<Question>(initialQuestion);
+  const [question, setQuestion] = useState<Equation>(initialQuestion);
   const [filledIndexes, setFilledIndexes] = useState<number[]>([]);
   const [showGameAction, setShowGameAction] = useState(false);
 

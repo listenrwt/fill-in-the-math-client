@@ -1,4 +1,4 @@
-import { Difficulty } from './question.enum';
+import { Difficulty, MathSymbol } from './question.enum';
 
 // Base interface for all socket communications
 export interface BaseSocketMessage {
@@ -9,7 +9,7 @@ export interface BaseSocketMessage {
 // Room related interfaces
 export interface RoomConfig {
   timeLimit: number; // seconds
-  questionDifficulty: Difficulty;
+  Difficulty: Difficulty;
   maxPlayers: number;
   attackDamage: number;
   healAmount: number;
@@ -75,19 +75,4 @@ export enum RoomStatus {
 export enum ActionType {
   ATTACK = 'attack',
   HEAL = 'heal',
-}
-
-// Enums
-// Game Generation related
-/**
- * Enumeration representing mathematical operation symbols and a blank placeholder.
- * @enum {string}
- */
-export enum MathSymbol {
-  Addition = '+',
-  Subtraction = '-',
-  Multiplication = '*',
-  Division = '/',
-  Equals = '=',
-  Blank = '?',
 }

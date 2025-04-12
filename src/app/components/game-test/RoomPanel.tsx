@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useEffect, useRef } from 'react';
 
 import {
   Box,
@@ -38,7 +38,6 @@ interface RoomPanelProps {
   leaveRoom: () => void;
   updateRoomSettings: () => void;
   startGame?: () => void;
-  restartGame?: () => void;
 }
 
 export const RoomPanel = ({
@@ -56,10 +55,15 @@ export const RoomPanel = ({
   leaveRoom,
   updateRoomSettings,
   startGame,
-  restartGame,
 }: RoomPanelProps) => {
+  // Use a ref to track if the change was initiated by the user
+  const userInitiatedChange = useRef(false);
+
   // Function to handle public toggle change
   const handlePublicToggleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Flag that this change was initiated by user action
+    userInitiatedChange.current = true;
+
     // Create a synthetic event that matches the format expected by handleRoomConfigChange
     const syntheticEvent = {
       target: {
@@ -71,11 +75,30 @@ export const RoomPanel = ({
     handleRoomConfigChange(syntheticEvent as ChangeEvent<{ name: string; value: boolean }>);
   };
 
+  // Effect to ensure roomConfig stays in sync with currentRoom config
+  // but only when not modified by the user
+  useEffect(() => {
+    if (currentRoom && !userInitiatedChange.current) {
+      // Only sync from server when the values differ and it's not a user-initiated change
+      if (roomConfig.isPublic !== currentRoom.config.isPublic) {
+        const syntheticEvent = {
+          target: {
+            name: 'isPublic',
+            value: currentRoom.config.isPublic,
+          },
+        };
+        handleRoomConfigChange(syntheticEvent as ChangeEvent<{ name: string; value: boolean }>);
+      }
+    }
+
+    // Reset the flag after each render
+    userInitiatedChange.current = false;
+  }, [currentRoom, roomConfig.isPublic, handleRoomConfigChange]);
+
   // If we're in a room, show the room management UI
   if (currentRoom) {
     const isHost = currentRoom.hostId === socketService.getSocket()?.id;
     const isWaiting = currentRoom.status === RoomStatus.WAITING;
-    const isFinished = currentRoom.status === RoomStatus.FINISHED;
 
     // Function to update settings and start game
     const handleStartGame = () => {
@@ -83,15 +106,6 @@ export const RoomPanel = ({
         // First update room settings, then start the game
         updateRoomSettings();
         startGame();
-      }
-    };
-
-    // Function to update settings and restart game
-    const handleRestartGame = () => {
-      if (restartGame) {
-        // First update room settings, then restart the game
-        updateRoomSettings();
-        restartGame();
       }
     };
 
@@ -118,7 +132,7 @@ export const RoomPanel = ({
             </Box>
           </Grid>
 
-          {isHost && (isWaiting || isFinished) && (
+          {isHost && isWaiting && (
             <>
               <Grid item xs={12}>
                 <Typography variant="h6">Room Settings</Typography>
@@ -152,9 +166,9 @@ export const RoomPanel = ({
                 <FormControl fullWidth>
                   <InputLabel>Difficulty</InputLabel>
                   <Select
-                    value={roomConfig.questionDifficulty}
+                    value={roomConfig.Difficulty}
                     label="Difficulty"
-                    name="questionDifficulty"
+                    name="Difficulty"
                     onChange={handleRoomConfigChange as (e: SelectChangeEvent) => void}
                   >
                     <MenuItem value={Difficulty.EASY}>Easy</MenuItem>
@@ -216,18 +230,6 @@ export const RoomPanel = ({
                   disabled={currentRoom.players.length < 2}
                 >
                   Start Game
-                </Button>
-              </Grid>
-            )}
-            {isHost && isFinished && restartGame && (
-              <Grid item>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleRestartGame}
-                  disabled={currentRoom.players.length < 2}
-                >
-                  Restart Game
                 </Button>
               </Grid>
             )}

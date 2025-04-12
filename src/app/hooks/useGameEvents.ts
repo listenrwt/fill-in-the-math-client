@@ -39,6 +39,8 @@ export const useGameEvents = () => {
     joinRoom,
     quickJoin,
     leaveRoom,
+    deleteRoom,
+    continueGame,
     updateRoomSettings,
   } = useRoomEvents(isConnected);
 
@@ -255,6 +257,8 @@ export const useGameEvents = () => {
     joinRoom,
     quickJoin,
     leaveRoom,
+    deleteRoom,
+    continueGame,
     updateRoomSettings,
     connectToServer,
     disconnectFromServer,

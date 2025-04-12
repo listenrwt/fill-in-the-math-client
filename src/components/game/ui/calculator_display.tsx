@@ -5,10 +5,10 @@
 import { Box, Typography } from '@mui/material';
 
 import { MathSymbol } from '@/lib/question.enum';
-import { Question } from '@/lib/question.types';
+import { Equation } from '@/lib/question.types';
 
 interface CalculatorDisplayProps {
-  question: Question;
+  question: Equation;
 }
 
 const CalculatorDisplay = ({ question }: CalculatorDisplayProps) => {

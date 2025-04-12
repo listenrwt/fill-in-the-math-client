@@ -9,7 +9,7 @@ import socketService from '../../services/socket.service';
 // Create a default config to avoid undefined issues
 const DEFAULT_CONFIG: RoomConfig = {
   timeLimit: DEFAULT_ROOM_SETTINGS.TIME_LIMIT,
-  questionDifficulty: DEFAULT_ROOM_SETTINGS.DIFFICULTY,
+  Difficulty: DEFAULT_ROOM_SETTINGS.DIFFICULTY,
   maxPlayers: DEFAULT_ROOM_SETTINGS.MAX_PLAYERS,
   attackDamage: DEFAULT_ROOM_SETTINGS.ATTACK_DAMAGE,
   healAmount: DEFAULT_ROOM_SETTINGS.HEAL_AMOUNT,
@@ -30,7 +30,7 @@ export const useRoomEvents = (isConnected: boolean) => {
   ) => {
     const { name, value } = e.target;
     const newValue =
-      name === 'questionDifficulty' ? value : name === 'isPublic' ? Boolean(value) : Number(value);
+      name === 'Difficulty' ? value : name === 'isPublic' ? Boolean(value) : Number(value);
 
     setRoomConfig((prevConfig) => ({
       ...prevConfig,
@@ -68,9 +68,13 @@ export const useRoomEvents = (isConnected: boolean) => {
       setGameMessage('Left room');
     });
 
+    socketService.on(RoomEvents.ROOM_DELETED, () => {
+      setCurrentRoom(null);
+      setGameMessage('Room has been deleted');
+    });
+
     socketService.on<RoomResponse>(RoomEvents.ROOM_UPDATED, (data) => {
       setCurrentRoom(data.room);
-      setRoomConfig(data.room.config);
       setGameMessage('Room settings updated');
     });
 
@@ -82,6 +86,7 @@ export const useRoomEvents = (isConnected: boolean) => {
       socketService.off(RoomEvents.ROOM_CREATED);
       socketService.off(RoomEvents.ROOM_JOINED);
       socketService.off(RoomEvents.ROOM_LEFT);
+      socketService.off(RoomEvents.ROOM_DELETED);
       socketService.off(RoomEvents.ROOM_UPDATED);
       socketService.off(RoomEvents.NO_ROOMS_AVAILABLE);
     };
@@ -117,8 +122,24 @@ export const useRoomEvents = (isConnected: boolean) => {
 
   const leaveRoom = () => {
     if (!isConnected || !currentRoom) return;
-
+    updateRoomSettings();
     socketService.emit(RoomEvents.LEAVE_ROOM, {
+      roomId: currentRoom.id,
+    });
+  };
+
+  const deleteRoom = () => {
+    if (!isConnected || !currentRoom) return;
+
+    socketService.emit(RoomEvents.DELETE_ROOM, {
+      roomId: currentRoom.id,
+    });
+  };
+
+  const continueGame = () => {
+    if (!isConnected || !currentRoom) return;
+
+    socketService.emit(RoomEvents.CONTINUE_GAME, {
       roomId: currentRoom.id,
     });
   };
@@ -149,6 +170,8 @@ export const useRoomEvents = (isConnected: boolean) => {
     joinRoom,
     quickJoin,
     leaveRoom,
+    deleteRoom,
+    continueGame,
     updateRoomSettings,
   };
 };
