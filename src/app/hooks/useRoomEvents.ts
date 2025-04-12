@@ -9,7 +9,7 @@ import socketService from '../../services/socket.service';
 // Create a default config to avoid undefined issues
 const DEFAULT_CONFIG: RoomConfig = {
   timeLimit: DEFAULT_ROOM_SETTINGS.TIME_LIMIT,
-  questionDifficulty: DEFAULT_ROOM_SETTINGS.DIFFICULTY,
+  Difficulty: DEFAULT_ROOM_SETTINGS.DIFFICULTY,
   maxPlayers: DEFAULT_ROOM_SETTINGS.MAX_PLAYERS,
   attackDamage: DEFAULT_ROOM_SETTINGS.ATTACK_DAMAGE,
   healAmount: DEFAULT_ROOM_SETTINGS.HEAL_AMOUNT,
@@ -30,7 +30,7 @@ export const useRoomEvents = (isConnected: boolean) => {
   ) => {
     const { name, value } = e.target;
     const newValue =
-      name === 'questionDifficulty' ? value : name === 'isPublic' ? Boolean(value) : Number(value);
+      name === 'Difficulty' ? value : name === 'isPublic' ? Boolean(value) : Number(value);
 
     setRoomConfig((prevConfig) => ({
       ...prevConfig,

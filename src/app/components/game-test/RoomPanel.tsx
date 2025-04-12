@@ -152,9 +152,9 @@ export const RoomPanel = ({
                 <FormControl fullWidth>
                   <InputLabel>Difficulty</InputLabel>
                   <Select
-                    value={roomConfig.questionDifficulty}
+                    value={roomConfig.Difficulty}
                     label="Difficulty"
-                    name="questionDifficulty"
+                    name="Difficulty"
                     onChange={handleRoomConfigChange as (e: SelectChangeEvent) => void}
                   >
                     <MenuItem value={Difficulty.EASY}>Easy</MenuItem>
