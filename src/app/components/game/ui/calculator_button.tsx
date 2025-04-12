@@ -31,7 +31,7 @@ export default function CalculatorButton({
         style = { bgcolor: '#009900', color: '#FFFFFF' };
         break;
       default:
-        style = { bgcolor: '#909090', color: '#FFFFFF' };
+        style = { bgcolor: '#919191', color: '#FFFFFF' };
     }
 
     if (selected) {
@@ -43,7 +43,7 @@ export default function CalculatorButton({
 
   return (
     <Button
-      variant="contained"
+      variant="text"
       sx={{
         width: 60,
         height: 60,
