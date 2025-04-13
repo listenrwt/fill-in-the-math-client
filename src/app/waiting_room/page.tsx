@@ -4,27 +4,15 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import {
-  Box,
-  Button,
-  FormControl,
-  Grid,
-  Grid2,
-  InputLabel,
-  List,
-  ListItem,
-  MenuItem,
-  Select,
-  TextField,
-  Typography,
-  alpha,
-} from '@mui/material';
+import { Box, Grid, Grid2, Typography } from '@mui/material';
 import { Socket, io } from 'socket.io-client';
+
+import GameStartControls from '../components/waiting_room/game_start_controls';
+import PlayerList from '../components/waiting_room/player_list';
+import SettingsPanel from '../components/waiting_room/settings_panel';
 
 export default function WaitingRoomPage() {
   const router = useRouter();
-
-  // Define the socket reference with an explicit type allowing null.
   const socketRef = useRef<Socket | null>(null);
 
   interface Player {
@@ -33,13 +21,12 @@ export default function WaitingRoomPage() {
     isHost: boolean;
   }
 
-  // Room states and settings...
   const [roomName, setRoomName] = useState('Fun math room');
   const [roomId, setRoomId] = useState('u1g92c2');
   const [players, setPlayers] = useState<Player[]>([]);
   const [isHost, setIsHost] = useState(true);
-  // For testing, set to true
-  // In a real application, this would be determined by the server.
+
+  // Game room settings.
   const [timeLimit, setTimeLimit] = useState(30);
   const [difficulty, setDifficulty] = useState('medium');
   const [maxPlayers, setMaxPlayers] = useState(4);
@@ -48,30 +35,22 @@ export default function WaitingRoomPage() {
   const [wrongAnswerPenalty, setWrongAnswerPenalty] = useState(3);
   const [countdown, setCountdown] = useState(10);
   const [countdownActive, setCountdownActive] = useState(false);
-  const [gameStatus, setGameStatus] = useState('Waiting...'); // 'waiting' or 'starting'
+  const [gameStatus, setGameStatus] = useState('Waiting...');
 
   useEffect(() => {
-    // Initialize socket connection with correct port and backend (Node.js)
     socketRef.current = io('http://localhost:3001');
-    // Join the room
     socketRef.current.emit('joinRoom', { roomId });
-
-    // Listen for room data updates from the server
     socketRef.current.on('roomData', (data) => {
       setRoomName(data.roomName);
       setRoomId(data.roomId);
       setPlayers(data.players);
-      // Assume the server sends currentPlayer data with an isHost flag
       setIsHost(data.currentPlayer?.isHost);
     });
-
     return () => {
-      // Clean up the socket connection on component unmount
       if (socketRef.current) socketRef.current.disconnect();
     };
   }, [roomId]);
 
-  // Countdown effect: when active, update the timer every second and navigate to the game page when finished.
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (countdownActive && countdown > 0) {
@@ -91,7 +70,6 @@ export default function WaitingRoomPage() {
 
   const handleStart = () => {
     if (!isHost) return;
-    // Emit the settings to the server to start the game
     socketRef.current?.emit('startGame', {
       timeLimit,
       difficulty,
@@ -100,7 +78,6 @@ export default function WaitingRoomPage() {
       healAmount,
       wrongAnswerPenalty,
     });
-    // Start the 10-second countdown
     setCountdown(10);
     setCountdownActive(true);
     setGameStatus('starting');
@@ -109,28 +86,6 @@ export default function WaitingRoomPage() {
   const handleLeave = () => {
     socketRef.current?.emit('leaveRoom', { roomId });
     router.push('/lobby');
-  };
-
-  // A helper style for TextFields and FormControl (for number / select settings)
-  // to enforce black borders and black input color.
-  const textFieldSX = {
-    '& .MuiOutlinedInput-root': {
-      '& fieldset': { borderColor: 'black' },
-      '&:hover fieldset': { borderColor: 'black' },
-      '&.Mui-focused fieldset': { borderColor: 'black' },
-    },
-    '& input': { color: 'black' },
-    '& label': { color: 'black' },
-  };
-  const FormControlSX = {
-    '& .MuiSelect-icon': { color: 'black' },
-    '& .MuiSelect-select': { color: 'black' },
-    '& .MuiFormLabel-root': { color: 'black' },
-    '& .MuiOutlinedInput-root': {
-      '& fieldset': { borderColor: 'black' },
-      '&:hover fieldset': { borderColor: 'black' },
-      '&.Mui-focused fieldset': { borderColor: 'black' },
-    },
   };
 
   return (
@@ -151,147 +106,43 @@ export default function WaitingRoomPage() {
               <Typography variant="subtitle1">(ID: {roomId})</Typography>
             </Box>
           </Grid>
-          {/* Status Bar */}
+          {/* Status */}
           <Grid item xs={12}>
-            <Box
-              sx={{
-                p: 2,
-              }}
-            >
+            <Box sx={{ p: 2 }}>
               <Typography variant="h6">Status: {gameStatus}</Typography>
             </Box>
           </Grid>
           {/* Players List */}
           <Grid item xs={12}>
-            <Box sx={{ p: 2 }}>
-              <Typography variant="h6">Players</Typography>
-              <List>
-                {players.map((player, index) => (
-                  <ListItem key={player.id || index}>
-                    {player.name} {player.isHost ? '(Host)' : ''}
-                  </ListItem>
-                ))}
-              </List>
-            </Box>
+            <PlayerList players={players} />
           </Grid>
-
-          {/* Settings Area */}
+          {/* Settings Panel */}
           <Grid item xs={12}>
-            <Box sx={{ p: 2, borderRadius: 2 }}>
-              <Typography variant="h6">Settings</Typography>
-              <Grid container mt={2} spacing={2}>
-                <Grid item xs={6} sm={4}>
-                  <TextField
-                    label="Time Limit"
-                    type="number"
-                    value={timeLimit}
-                    onChange={(e) => setTimeLimit(parseInt(e.target.value))}
-                    disabled={!isHost}
-                    fullWidth
-                    sx={textFieldSX}
-                  />
-                </Grid>
-                <Grid item xs={6} sm={4}>
-                  <FormControl fullWidth disabled={!isHost} sx={FormControlSX}>
-                    <InputLabel>Difficulty</InputLabel>
-                    <Select
-                      value={difficulty}
-                      label="Difficulty"
-                      onChange={(e) => setDifficulty(e.target.value)}
-                    >
-                      <MenuItem value="easy">Easy</MenuItem>
-                      <MenuItem value="medium">Medium</MenuItem>
-                      <MenuItem value="hard">Hard</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={6} sm={4}>
-                  <TextField
-                    label="Max Players"
-                    type="number"
-                    value={maxPlayers}
-                    onChange={(e) => setMaxPlayers(parseInt(e.target.value))}
-                    disabled={!isHost}
-                    fullWidth
-                    sx={textFieldSX}
-                  />
-                </Grid>
-                <Grid item xs={6} sm={4}>
-                  <TextField
-                    label="Attack Damage"
-                    type="number"
-                    value={attackDamage}
-                    onChange={(e) => setAttackDamage(parseInt(e.target.value))}
-                    disabled={!isHost}
-                    fullWidth
-                    sx={textFieldSX}
-                  />
-                </Grid>
-                <Grid item xs={6} sm={4}>
-                  <TextField
-                    label="Heal Amount"
-                    type="number"
-                    value={healAmount}
-                    onChange={(e) => setHealAmount(parseInt(e.target.value))}
-                    disabled={!isHost}
-                    fullWidth
-                    sx={textFieldSX}
-                  />
-                </Grid>
-                <Grid item xs={6} sm={4}>
-                  <TextField
-                    label="Wrong Answer Penalty"
-                    type="number"
-                    value={wrongAnswerPenalty}
-                    onChange={(e) => setWrongAnswerPenalty(parseInt(e.target.value))}
-                    disabled={!isHost}
-                    fullWidth
-                    sx={textFieldSX}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
+            <SettingsPanel
+              timeLimit={timeLimit}
+              difficulty={difficulty}
+              maxPlayers={maxPlayers}
+              attackDamage={attackDamage}
+              healAmount={healAmount}
+              wrongAnswerPenalty={wrongAnswerPenalty}
+              disabled={!isHost}
+              onTimeLimitChange={setTimeLimit}
+              onDifficultyChange={setDifficulty}
+              onMaxPlayersChange={setMaxPlayers}
+              onAttackDamageChange={setAttackDamage}
+              onHealAmountChange={setHealAmount}
+              onWrongAnswerPenaltyChange={setWrongAnswerPenalty}
+            />
           </Grid>
-
-          {/* Game Start Area */}
+          {/* Game Start Controls */}
           <Grid item xs={12}>
-            <Box sx={{ p: 2, borderRadius: 2, textAlign: 'center' }}>
-              {!countdownActive ? (
-                <Grid container spacing={2} justifyContent="flex-start">
-                  <Grid item>
-                    <Button
-                      variant="contained"
-                      onClick={handleStart}
-                      disabled={!isHost}
-                      sx={{
-                        backgroundColor: 'green',
-                        '&:hover': { backgroundColor: 'darkgreen' },
-                      }}
-                    >
-                      Start
-                    </Button>
-                  </Grid>
-                  <Grid item>
-                    <Button
-                      variant="outlined"
-                      onClick={handleLeave}
-                      sx={{
-                        borderColor: '#919191',
-                        bgcolor: '#919191',
-                        color: '#1E1E1E',
-                        '&:hover': {
-                          backgroundColor: alpha('#919191', 0.8),
-                        },
-                      }}
-                    >
-                      Leave
-                    </Button>
-                  </Grid>
-                </Grid>
-              ) : (
-                <Typography variant="h6">Game starting in {countdown}...</Typography>
-              )}
-            </Box>
+            <GameStartControls
+              countdownActive={countdownActive}
+              countdown={countdown}
+              isHost={isHost}
+              onStart={handleStart}
+              onLeave={handleLeave}
+            />
           </Grid>
         </Grid>
       </Grid2>
