@@ -1,67 +1,129 @@
 'use client';
 
-import { useState } from 'react';
+import React from 'react';
 
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
-import { Button, Grid2, TextField, Typography } from '@mui/material';
+import { Box, Button, Grid, Typography } from '@mui/material';
 
-export default function LobbyPage() {
-  const [roomCode, setRoomCode] = useState('');
-  // later change to next.link instead of router, just testing
-  const router = useRouter();
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Allow only digits and a maximum of 6 characters
-    if (value.length <= 6 && /^\d*$/.test(value)) {
-      setRoomCode(value);
-    }
-  };
-
-  const handleSubmit = () => {
-    if (roomCode.length === 6) {
-      // When a valid 6-digit code is entered, redirect to the waiting room page.
-      router.push('/waiting_room');
-    } else {
-      alert('Please enter a valid 6-digit room code.');
-    }
-  };
-
+const Lobby = () => {
   return (
-    <Grid2
-      container
-      direction="column"
-      justifyContent="center"
-      alignItems="center"
-      spacing={2}
-      sx={{ minHeight: '100vh', p: 2 }}
+    <Box
+      sx={{
+        position: 'relative',
+        minHeight: '100vh',
+        minWidth: '100vw',
+        padding: 2,
+      }}
     >
-      <Grid2>
-        <Typography variant="h4" sx={{ textAlign: 'center' }}>
-          Enter Room Code
+      {/* Top bar with logo (left) and course title (right) */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mt: 0.5,
+        }}
+      >
+        <Box>
+          {/* TO BE IMPLEMENTED: <img src="/logo.png" alt="Fill in the Math Logo" style={{ height: '50px' }} /> */}
+        </Box>
+        <Box>
+          <Typography sx={{ color: '#ffffff' }}>CSCI3100 Software&nbsp;Engineering</Typography>
+        </Box>
+      </Box>
+
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'column',
+          textAlign: 'center',
+        }}
+      >
+        {/* Title */}
+        <Typography variant="h4" sx={{ color: '#ffffff', mb: 2 }}>
+          Fill in the Math
         </Typography>
-      </Grid2>
-      <Grid2>
-        <TextField
-          value={roomCode}
-          onChange={handleChange}
-          variant="outlined"
-          placeholder="______"
-          inputProps={{
-            maxLength: 6,
-            style: { textAlign: 'center', fontSize: '1.5rem' },
-          }}
-          sx={{
-            '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: '#ffffff' } },
-          }}
-        />
-      </Grid2>
-      <Grid2>
-        <Button variant="contained" onClick={handleSubmit} sx={{ bgcolor: 'green' }}>
-          Join Room
-        </Button>
-      </Grid2>
-    </Grid2>
+
+        {/* Center box with prompt and buttons */}
+        <Box
+          bgcolor={'#ffffff'}
+          width={{ xs: '400px', md: '600px' }}
+          height={{ xs: '120px', md: '144px' }}
+          borderRadius={2}
+        >
+          <Typography
+            sx={{
+              fontSize: { xs: '20px', md: '24px' },
+              m: { xs: 1.875, md: 2.25 },
+              color: '#000000',
+            }}
+          >
+            please select
+          </Typography>
+          <Grid container justifyContent="center">
+            <Box>
+              <Link href="/game" passHref>
+                <Button
+                  variant="contained"
+                  sx={{
+                    fontSize: { xs: '1rem', md: '1.2rem' },
+                    borderRadius: '0 0 0 8px',
+                    backgroundColor: '#919191',
+                    '&:hover': { backgroundColor: '#7a7a7a' },
+                    width: { xs: '200px', md: '300px' },
+                    height: { xs: '60px', md: '72px' },
+                  }}
+                >
+                  Play&nbsp;as&nbsp;Guest
+                </Button>
+              </Link>
+            </Box>
+            <Box>
+              <Link href="/login" passHref>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  sx={{
+                    fontSize: { xs: '1rem', md: '1.2rem' },
+                    borderRadius: '0 0 8px 0',
+                    backgroundColor: '#919191',
+                    '&:hover': { backgroundColor: '#7a7a7a' },
+                    width: { xs: '200px', md: '300px' },
+                    height: { xs: '60px', md: '72px' },
+                  }}
+                >
+                  Login/Register
+                </Button>
+              </Link>
+            </Box>
+          </Grid>
+        </Box>
+        {/* Title */}
+        <Typography variant="h4" sx={{ color: 'transparent', mb: 2 }}>
+          .
+        </Typography>
+      </Box>
+
+      {/* Bottom left information */}
+      <Box sx={{ position: 'fixed', bottom: 16, left: 16 }}>
+        <Typography variant="body1" sx={{ color: '#ffffff' }}>
+          Created by Group B8 <br></br> 1155194693&nbsp;Kwok&nbsp;Ka&nbsp;Ming&nbsp;|
+          1155194687&nbsp;Lau&nbsp;Tsun&nbsp;Shing&nbsp;|
+          1155190674&nbsp;Nagi&nbsp;Ka&nbsp;Shing&nbsp;|
+          <br></br>1155189319&nbsp;Cheng&nbsp;Jonathan&nbsp;Yue&nbsp;Ming |
+          1155192782&nbsp;Chan&nbsp;Jackson&nbsp;|
+        </Typography>
+      </Box>
+    </Box>
   );
-}
+};
+
+export default Lobby;
