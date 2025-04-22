@@ -51,6 +51,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
     },
     '& input': { color: 'black' },
     '& label': { color: 'black' },
+    '& label.Mui-focused': { color: 'black' },
   };
 
   const FormControlSX = {
@@ -65,9 +66,11 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   };
 
   return (
-    <Box sx={{ p: 2, borderRadius: 2 }}>
-      <Typography variant="h6">Settings</Typography>
-      <Grid container mt={2} spacing={2}>
+    <Box sx={{ borderRadius: 2 }}>
+      <Box p={2} bgcolor="#ffffff" sx={{ borderRadius: '8px 8px 0 0', textAlign: 'center' }}>
+        <Typography variant="h6">Settings</Typography>
+      </Box>
+      <Grid container p={2} spacing={2}>
         <Grid item xs={6} sm={4}>
           <TextField
             label="Time Limit"

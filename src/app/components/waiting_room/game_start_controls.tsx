@@ -17,24 +17,20 @@ const GameStartControls: React.FC<GameStartControlsProps> = ({
   onStart,
   onLeave,
 }) => {
+  // Define a common sx style for the trapezium shape
+  const trapeziumStyle = {
+    clipPath: 'polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%)',
+    position: 'relative',
+    height: '60px',
+    width: { xs: '90px', sm: '120px', md: '150px' },
+    borderRadius: '0',
+  };
+
   return (
-    <Box sx={{ p: 2, borderRadius: 2, textAlign: 'center' }}>
+    <Box width="100%" sx={{ textAlign: 'center' }}>
       {!countdownActive ? (
-        <Grid container spacing={2} justifyContent="flex-start">
-          <Grid item>
-            <Button
-              variant="contained"
-              onClick={onStart}
-              disabled={!isHost}
-              sx={{
-                backgroundColor: 'green',
-                '&:hover': { backgroundColor: 'darkgreen' },
-              }}
-            >
-              Start
-            </Button>
-          </Grid>
-          <Grid item>
+        <Grid container spacing={2} justifyContent="center">
+          <Box sx={{ position: 'absolute', left: 0, bottom: 0 }}>
             <Button
               variant="outlined"
               onClick={onLeave}
@@ -45,9 +41,24 @@ const GameStartControls: React.FC<GameStartControlsProps> = ({
                 '&:hover': {
                   backgroundColor: alpha('#919191', 0.8),
                 },
+                ...trapeziumStyle,
               }}
             >
               Leave
+            </Button>
+          </Box>
+          <Grid item>
+            <Button
+              variant="contained"
+              onClick={onStart}
+              disabled={!isHost}
+              sx={{
+                backgroundColor: 'green',
+                '&:hover': { backgroundColor: 'darkgreen' },
+                ...trapeziumStyle,
+              }}
+            >
+              Start
             </Button>
           </Grid>
         </Grid>
