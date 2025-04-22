@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { Box, Grid, Grid2, Typography } from '@mui/material';
+import { Box, Grid2, Typography } from '@mui/material';
 import { Socket, io } from 'socket.io-client';
 
 import GameStartControls from '../components/waiting_room/game_start_controls';
@@ -16,11 +16,11 @@ export default function WaitingRoomPage() {
   const socketRef = useRef<Socket | null>(null);
 
   interface Player {
-    id?: string;
-    name: string;
+    id: number;
+    username: string;
     isHost: boolean;
+    avatarUrl?: string;
   }
-
   const [roomName, setRoomName] = useState('Fun math room');
   const [roomId, setRoomId] = useState('u1g92c2');
   const [players, setPlayers] = useState<Player[]>([]);
@@ -52,21 +52,42 @@ export default function WaitingRoomPage() {
   }, [roomId]);
 
   useEffect(() => {
+    if (players.length === 0) {
+      const samplePlayers: Player[] = [
+        { id: 0, username: 'You', isHost: true },
+        { id: 1, username: 'Player1', isHost: false },
+        { id: 2, username: 'Player2', isHost: false },
+        { id: 3, username: 'Player3', isHost: false },
+      ];
+      setPlayers(samplePlayers);
+    }
+  }, [players]);
+
+  useEffect(() => {
     let timer: NodeJS.Timeout;
+
     if (countdownActive && countdown > 0) {
-      timer = setInterval(() => {
+      timer = setTimeout(() => {
         setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            router.push('/game');
+          const next = prev - 1;
+          if (next <= 0) {
+            setCountdownActive(false);
             return 0;
           }
-          return prev - 1;
+          return next;
         });
       }, 1000);
     }
-    return () => clearInterval(timer);
-  }, [countdownActive, countdown, router]);
+
+    return () => clearTimeout(timer);
+  }, [countdown, countdownActive]);
+
+  // Separate navigation effect (runs only when countdown hits 0)
+  useEffect(() => {
+    if (countdownActive === false && countdown === 0) {
+      router.push('/game');
+    }
+  }, [countdown, countdownActive, router]);
 
   const handleStart = () => {
     if (!isHost) return;
@@ -89,63 +110,110 @@ export default function WaitingRoomPage() {
   };
 
   return (
-    <Grid2 container padding={2} maxWidth={900} margin="auto" borderRadius={2}>
-      <Grid2 container bgcolor="#D9D9D9" color="#000000" borderRadius={2}>
-        <Grid container>
-          {/* Top Section: Room Name and ID */}
-          <Grid item xs={12}>
-            <Box
-              sx={{
-                backgroundColor: '#fff',
-                p: 2,
-                borderRadius: '8px 8px 0 0',
-                textAlign: 'center',
-              }}
-            >
-              <Typography variant="h5">Room: {roomName}</Typography>
-              <Typography variant="subtitle1">(ID: {roomId})</Typography>
-            </Box>
-          </Grid>
-          {/* Status */}
-          <Grid item xs={12}>
-            <Box sx={{ p: 2 }}>
-              <Typography variant="h6">Status: {gameStatus}</Typography>
-            </Box>
-          </Grid>
+    <Grid2
+      container
+      direction="column"
+      minHeight="100vh"
+      minWidth="100vw"
+      justifyContent="space-between"
+    >
+      <Grid2></Grid2>
+      <Grid2 container direction="column" justifyContent="center" sx={{ alignSelf: 'center' }}>
+        {/* Top Section: Room Name and ID */}
+        <Box sx={{ p: 2, textAlign: 'center' }}>
+          <Typography variant="h5">
+            Room: {roomName} (ID:&nbsp;{roomId})
+          </Typography>
+        </Box>
+        {/* Status */}
+        <Box width="100%" maxWidth={900} sx={{ p: 2, textAlign: { xs: 'center', md: 'right' } }}>
+          <Typography variant="subtitle1">Status: {gameStatus}</Typography>
+        </Box>
+
+        {/* Players List & Main Waiting Room Section Side-by-Side */}
+        <Grid2
+          container
+          direction="row"
+          justifyContent="center"
+          alignItems="flex-start"
+          spacing={2}
+        >
           {/* Players List */}
-          <Grid item xs={12}>
-            <PlayerList players={players} />
-          </Grid>
-          {/* Settings Panel */}
-          <Grid item xs={12}>
-            <SettingsPanel
-              timeLimit={timeLimit}
-              difficulty={difficulty}
-              maxPlayers={maxPlayers}
-              attackDamage={attackDamage}
-              healAmount={healAmount}
-              wrongAnswerPenalty={wrongAnswerPenalty}
-              disabled={!isHost}
-              onTimeLimitChange={setTimeLimit}
-              onDifficultyChange={setDifficulty}
-              onMaxPlayersChange={setMaxPlayers}
-              onAttackDamageChange={setAttackDamage}
-              onHealAmountChange={setHealAmount}
-              onWrongAnswerPenaltyChange={setWrongAnswerPenalty}
-            />
-          </Grid>
-          {/* Game Start Controls */}
-          <Grid item xs={12}>
-            <GameStartControls
-              countdownActive={countdownActive}
-              countdown={countdown}
-              isHost={isHost}
-              onStart={handleStart}
-              onLeave={handleLeave}
-            />
-          </Grid>
-        </Grid>
+          <Grid2>
+            <Grid2 container padding={2} maxWidth={300} borderRadius={2}>
+              <Grid2 container bgcolor="#D9D9D9" color="#000000" borderRadius={2}>
+                <PlayerList players={players} maxPlayers={maxPlayers} />
+              </Grid2>
+            </Grid2>
+          </Grid2>
+
+          {/* Main Waiting Room Section */}
+          <Grid2>
+            <Grid2 container padding={2} minWidth={300} maxWidth={600} borderRadius={2}>
+              <Grid2 container bgcolor="#D9D9D9" color="#000000" borderRadius={2}>
+                {/* Settings Panel */}
+                <Grid2>
+                  <SettingsPanel
+                    timeLimit={timeLimit}
+                    difficulty={difficulty}
+                    maxPlayers={maxPlayers}
+                    attackDamage={attackDamage}
+                    healAmount={healAmount}
+                    wrongAnswerPenalty={wrongAnswerPenalty}
+                    disabled={!isHost}
+                    onTimeLimitChange={setTimeLimit}
+                    onDifficultyChange={setDifficulty}
+                    onMaxPlayersChange={setMaxPlayers}
+                    onAttackDamageChange={setAttackDamage}
+                    onHealAmountChange={setHealAmount}
+                    onWrongAnswerPenaltyChange={setWrongAnswerPenalty}
+                  />
+                </Grid2>
+              </Grid2>
+            </Grid2>
+          </Grid2>
+        </Grid2>
       </Grid2>
+
+      <Box
+        alignItems="flex-end"
+        minWidth="100vw"
+        justifyContent="center"
+        sx={{ alignSelf: 'flex-end' }}
+      >
+        {/* GameStartControls floating above grey bar, no margin */}
+
+        {/* Floating buttons above the grey bar */}
+        <Box
+          sx={{
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            position: 'relative',
+            transform: 'translateY(30px)',
+            zIndex: 2,
+          }}
+        >
+          <GameStartControls
+            countdownActive={countdownActive}
+            countdown={countdown}
+            isHost={isHost}
+            onStart={handleStart}
+            onLeave={handleLeave}
+          />
+        </Box>
+        {/* Grey bar at the bottom */}
+        <Box
+          sx={{
+            width: '100%',
+            height: 30, // Grey bar height.
+            bgcolor: '#D9D9D9',
+            position: 'relative',
+            bottom: 0,
+            zIndex: 1, // Lower stacking order.
+          }}
+        />
+      </Box>
     </Grid2>
   );
 }
