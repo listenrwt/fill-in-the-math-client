@@ -36,6 +36,7 @@ export default function WaitingRoomPage() {
   const [countdown, setCountdown] = useState(10);
   const [countdownActive, setCountdownActive] = useState(false);
   const [gameStatus, setGameStatus] = useState('Waiting...');
+  const [isRoomPublic, setIsRoomPublic] = useState(false);
 
   useEffect(() => {
     socketRef.current = io('http://localhost:3001');
@@ -167,6 +168,12 @@ export default function WaitingRoomPage() {
                     onAttackDamageChange={setAttackDamage}
                     onHealAmountChange={setHealAmount}
                     onWrongAnswerPenaltyChange={setWrongAnswerPenalty}
+                    isRoomPublic={isRoomPublic}
+                    onRoomPublicChange={(newVal) => {
+                      setIsRoomPublic(newVal);
+                      // Optionally emit your socket event to notify your server
+                      socketRef.current?.emit('setRoomPublic', { roomId, isPublic: newVal });
+                    }}
                   />
                 </Grid2>
               </Grid2>

@@ -7,6 +7,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  Switch,
   TextField,
   Typography,
 } from '@mui/material';
@@ -25,6 +26,9 @@ interface SettingsPanelProps {
   onAttackDamageChange: (value: number) => void;
   onHealAmountChange: (value: number) => void;
   onWrongAnswerPenaltyChange: (value: number) => void;
+  // New props for the public room toggle
+  isRoomPublic: boolean;
+  onRoomPublicChange: (value: boolean) => void;
 }
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({
@@ -41,8 +45,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onAttackDamageChange,
   onHealAmountChange,
   onWrongAnswerPenaltyChange,
+  isRoomPublic,
+  onRoomPublicChange,
 }) => {
-  // The style objects copied from the original page for a consistent appearance.
+  // Style objects for consistent appearance.
   const textFieldSX = {
     '& .MuiOutlinedInput-root': {
       '& fieldset': { borderColor: 'black' },
@@ -70,7 +76,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
       <Box p={2} bgcolor="#ffffff" sx={{ borderRadius: '8px 8px 0 0', textAlign: 'center' }}>
         <Typography variant="h6">Settings</Typography>
       </Box>
-      <Grid container p={2} spacing={2}>
+      <Grid container p={2} spacing={3}>
         <Grid item xs={6} sm={4}>
           <TextField
             label="Time Limit"
@@ -139,6 +145,52 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             fullWidth
             sx={textFieldSX}
           />
+        </Grid>
+        {/* Toggle button for setting the room to public */}
+        <Grid item xs={12}>
+          <Box display="flex" alignItems="center" justifyContent="flext-start">
+            <Typography variant="subtitle1" sx={{ mr: 1 }}>
+              Allow public joins:
+            </Typography>
+            <Switch
+              checked={isRoomPublic}
+              onChange={(e) => onRoomPublicChange(e.target.checked)}
+              disabled={disabled}
+              sx={{
+                width: 62,
+                height: 34,
+                padding: 0,
+                display: 'flex',
+                alignItems: 'center',
+                '& .MuiSwitch-switchBase': {
+                  padding: 1,
+                  top: '50%',
+                  transform: 'translate(-4px, -50%)',
+                  '&.Mui-checked': {
+                    transform: 'translate(20px, -50%)',
+                    color: '#fff',
+                    '& + .MuiSwitch-track': {
+                      backgroundColor: 'green',
+                      opacity: 1,
+                    },
+                  },
+                },
+                '& .MuiSwitch-thumb': {
+                  width: 32,
+                  height: 32,
+                  boxShadow: 'none',
+                },
+                '& .MuiSwitch-track': {
+                  borderRadius: 20,
+                  backgroundColor: '#ccc',
+                  opacity: 1,
+                  height: '100%',
+                  border: '1px solid black',
+                  boxSizing: 'border-box',
+                },
+              }}
+            />
+          </Box>
         </Grid>
       </Grid>
     </Box>
