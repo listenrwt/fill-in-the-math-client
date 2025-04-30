@@ -70,7 +70,7 @@ const Lobby = () => {
           </Typography>
           <Grid container justifyContent="center">
             <Box>
-              <Link href="/game" passHref>
+              <Link href="/lobby" passHref>
                 <Button
                   variant="contained"
                   sx={{
