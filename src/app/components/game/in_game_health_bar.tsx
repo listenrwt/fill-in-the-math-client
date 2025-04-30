@@ -4,10 +4,13 @@ import React, { useEffect, useState } from 'react';
 import { Box, LinearProgress, Stack, Typography } from '@mui/material';
 import io, { Socket } from 'socket.io-client';
 
+import UserAvatar from '../UserAvatar';
+
 // Define Player interface
 interface Player {
   id: number;
   username: string;
+  avatarId: number;
   hp: number; // HP represented as seconds left
   maxHp: number; // Maximum HP value
 }
@@ -52,10 +55,10 @@ const CompactLeaderboard = () => {
   useEffect(() => {
     if (players.length === 0) {
       const samplePlayers: Player[] = [
-        { id: 0, username: 'You', hp: 999, maxHp: 1000 },
-        { id: 1, username: 'Player1', hp: 18, maxHp: 30 },
-        { id: 2, username: 'Player2', hp: 22, maxHp: 30 },
-        { id: 3, username: 'Player3', hp: 8, maxHp: 30 },
+        { id: 0, username: 'You', hp: 999, maxHp: 1000, avatarId: 2 },
+        { id: 1, username: 'Player1', hp: 18, maxHp: 30, avatarId: 3 },
+        { id: 2, username: 'Player2', hp: 22, maxHp: 30, avatarId: 5 },
+        { id: 3, username: 'Player3', hp: 8, maxHp: 30, avatarId: 0 },
       ];
       setPlayers(samplePlayers);
     }
@@ -96,13 +99,19 @@ const CompactLeaderboard = () => {
             >
               {player.username}&nbsp;
             </Typography>
+            <UserAvatar
+              avatarId={player.avatarId ?? 1}
+              alt={player.username}
+              sx={{ width: { xs: 20, md: 24 }, height: { xs: 20, md: 24 } }}
+            />
             <LinearProgress
               variant="determinate"
               value={(player.hp / player.maxHp) * 100}
               sx={{
+                ml: { xs: 1, md: 1.5 },
                 width: { xs: 200, md: 300 },
                 margin: '0 auto',
-                height: 10,
+                height: { xs: 12, md: 15 },
                 borderRadius: 0.6,
                 backgroundColor: '#909090',
                 '& .MuiLinearProgress-bar': {
