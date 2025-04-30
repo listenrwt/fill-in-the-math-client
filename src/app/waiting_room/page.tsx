@@ -19,9 +19,8 @@ export default function WaitingRoomPage() {
     id: number;
     username: string;
     isHost: boolean;
-    avatarUrl?: string;
+    avatarID?: number;
   }
-  const [roomName, setRoomName] = useState('Fun math room');
   const [roomId, setRoomId] = useState('u1g92c2');
   const [players, setPlayers] = useState<Player[]>([]);
   const [isHost, setIsHost] = useState(true);
@@ -33,8 +32,6 @@ export default function WaitingRoomPage() {
   const [attackDamage, setAttackDamage] = useState(5);
   const [healAmount, setHealAmount] = useState(3);
   const [wrongAnswerPenalty, setWrongAnswerPenalty] = useState(3);
-  const [countdown, setCountdown] = useState(10);
-  const [countdownActive, setCountdownActive] = useState(false);
   const [gameStatus, setGameStatus] = useState('Waiting...');
   const [isRoomPublic, setIsRoomPublic] = useState(false);
 
@@ -42,7 +39,6 @@ export default function WaitingRoomPage() {
     socketRef.current = io('http://localhost:3001');
     socketRef.current.emit('joinRoom', { roomId });
     socketRef.current.on('roomData', (data) => {
-      setRoomName(data.roomName);
       setRoomId(data.roomId);
       setPlayers(data.players);
       setIsHost(data.currentPlayer?.isHost);
@@ -55,40 +51,14 @@ export default function WaitingRoomPage() {
   useEffect(() => {
     if (players.length === 0) {
       const samplePlayers: Player[] = [
-        { id: 0, username: 'You', isHost: true },
-        { id: 1, username: 'Player1', isHost: false },
-        { id: 2, username: 'Player2', isHost: false },
-        { id: 3, username: 'Player3', isHost: false },
+        { id: 0, username: 'You', isHost: true, avatarID: 0 },
+        { id: 1, username: 'Player1', isHost: false, avatarID: 2 },
+        { id: 2, username: 'Player2', isHost: false, avatarID: 3 },
+        { id: 3, username: 'Player3', isHost: false, avatarID: 7 },
       ];
       setPlayers(samplePlayers);
     }
   }, [players]);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-
-    if (countdownActive && countdown > 0) {
-      timer = setTimeout(() => {
-        setCountdown((prev) => {
-          const next = prev - 1;
-          if (next <= 0) {
-            setCountdownActive(false);
-            return 0;
-          }
-          return next;
-        });
-      }, 1000);
-    }
-
-    return () => clearTimeout(timer);
-  }, [countdown, countdownActive]);
-
-  // Separate navigation effect (runs only when countdown hits 0)
-  useEffect(() => {
-    if (countdownActive === false && countdown === 0) {
-      router.push('/game');
-    }
-  }, [countdown, countdownActive, router]);
 
   const handleStart = () => {
     if (!isHost) return;
@@ -100,9 +70,8 @@ export default function WaitingRoomPage() {
       healAmount,
       wrongAnswerPenalty,
     });
-    setCountdown(10);
-    setCountdownActive(true);
     setGameStatus('starting');
+    router.push('/game');
   };
 
   const handleLeave = () => {
@@ -122,9 +91,7 @@ export default function WaitingRoomPage() {
       <Grid2 container direction="column" justifyContent="center" sx={{ alignSelf: 'center' }}>
         {/* Top Section: Room Name and ID */}
         <Box sx={{ p: 2, textAlign: 'center' }}>
-          <Typography variant="h5">
-            Room: {roomName} (ID:&nbsp;{roomId})
-          </Typography>
+          <Typography variant="h4">Room Code:&nbsp;{roomId}</Typography>
         </Box>
         {/* Status */}
         <Box width="100%" maxWidth={900} sx={{ p: 2, textAlign: { xs: 'center', md: 'right' } }}>
@@ -201,13 +168,7 @@ export default function WaitingRoomPage() {
             zIndex: 2,
           }}
         >
-          <GameStartControls
-            countdownActive={countdownActive}
-            countdown={countdown}
-            isHost={isHost}
-            onStart={handleStart}
-            onLeave={handleLeave}
-          />
+          <GameStartControls isHost={isHost} onStart={handleStart} onLeave={handleLeave} />
         </Box>
         {/* Grey bar at the bottom */}
         <Box
