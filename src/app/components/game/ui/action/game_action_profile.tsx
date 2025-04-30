@@ -2,12 +2,14 @@ import React from 'react';
 
 import Image from 'next/image';
 
-import { Avatar, Box, Button, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
+
+import UserAvatar from '@/app/components/UserAvatar';
 
 export interface Player {
   id: number;
   username: string;
-  avatarUrl?: string;
+  avatarId?: number;
 }
 
 interface GameActionProfileProps {
@@ -37,13 +39,12 @@ const GameActionProfile: React.FC<GameActionProfileProps> = ({ player, action, o
     >
       {/* Container for the avatar and overlay image */}
       <Box position="relative" display="inline-block">
-        <Avatar
-          src={player.avatarUrl}
+        <UserAvatar
+          avatarId={player.avatarId ?? 1} // fallback to 1 if undefined
           alt={player.username}
           sx={{ width: { xs: 70, sm: 80, md: 100 }, height: { xs: 70, sm: 80, md: 100 } }}
-        >
-          {player.username.charAt(0)}
-        </Avatar>
+        />
+
         <Box
           sx={{
             position: 'absolute',

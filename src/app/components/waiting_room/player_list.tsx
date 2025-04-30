@@ -1,12 +1,14 @@
 import React from 'react';
 
-import { Avatar, Box, List, ListItem, Typography } from '@mui/material';
+import { Box, List, ListItem, Typography } from '@mui/material';
+
+import UserAvatar from '../UserAvatar';
 
 export interface Player {
   id?: number;
   username: string;
   isHost: boolean;
-  avatarUrl?: string;
+  avatarID?: number;
 }
 
 interface PlayerListProps {
@@ -32,17 +34,13 @@ const PlayerList: React.FC<PlayerListProps> = ({ players, maxPlayers }) => {
         <List>
           {players.map((player, index) => (
             <ListItem key={player.id || index}>
-              <Box display="flex" alignItems="center">
-                <Avatar
-                  src={player.avatarUrl}
+              <Box ml={1} display="flex" alignItems="center">
+                <UserAvatar
+                  avatarId={player.avatarID ?? 1} // fallback to 1 if undefined
                   alt={player.username}
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    marginRight: 2, // spacing between avatar and name
-                  }}
+                  size={40}
                 />
-                <Box>
+                <Box ml={2}>
                   {player.username} {player.isHost ? '(Host)' : ''}
                 </Box>
               </Box>

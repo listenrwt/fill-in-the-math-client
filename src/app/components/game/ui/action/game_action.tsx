@@ -1,4 +1,3 @@
-// File: game_action.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -9,19 +8,11 @@ import io, { Socket } from 'socket.io-client';
 import Stroke from '../stroke';
 import GameActionProfile from './game_action_profile';
 
-// File: game_action.tsx
-
-// File: game_action.tsx
-
-// File: game_action.tsx
-
-// File: game_action.tsx
-
 // Define a simple Player interface
 interface Player {
   id: number;
   username: string;
-  avatarUrl?: string;
+  avatarId?: number;
 }
 
 // Define the props for GameAction, including a callback that signals the end of the action phase.
@@ -64,14 +55,14 @@ const GameAction: React.FC<GameActionProps> = ({ onActionComplete }) => {
   const selfPlayer: Player = {
     id: 0,
     username: 'You',
-    avatarUrl: '', // Optionally, add a URL or leave it empty to use initials.
+    avatarId: 2, // Optionally, add a URL or leave it empty to use initials.
   };
 
   // sample players
   const enemyPlayers: Player[] = [
-    { id: 1, username: 'Player1', avatarUrl: '' },
-    { id: 2, username: 'Player2', avatarUrl: '' },
-    { id: 3, username: 'Player3', avatarUrl: '' },
+    { id: 1, username: 'Player1', avatarId: 3 },
+    { id: 2, username: 'Player2', avatarId: 5 },
+    { id: 3, username: 'Player3', avatarId: 0 },
   ];
 
   // Function to heal self by 5 HP and then signal to load the next question.
