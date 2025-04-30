@@ -3,45 +3,69 @@
 import { useState } from 'react';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-// import { useRouter } from 'next/navigation';
+import { Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
 
-import { Box, Button, TextField, Typography } from '@mui/material';
+import useSystemEvents from '../../hooks/useSystemEvents';
+
+interface LoginFormProps {
+  setNotification: (notification: {
+    open: boolean;
+    message: string;
+    severity: 'success' | 'error';
+  }) => void;
+}
 
 /**
  * LoginForm component handles user authentication through a form interface.
- *
- * @component
- * @returns {TSX.Element} A material-ui styled login form with username and password fields
- *
- * Features:
- * - Username and password input fields
- * - Login button that currently logs credentials to console
- * - Registration redirect button
- * - Styled using Material-UI components
- *
- * @example
- * ```tsx
- * <LoginForm />
- * ```
- *
- * Dependencies:
- * - Material-UI components (Box, Typography, TextField, Button)
- * - React useState hook
- * - Next.js useRouter hook
  */
-export default function LoginForm() {
-  // const router = useRouter(); // Initialize the router
-  const [username, setUsername] = useState('');
+export default function LoginForm({ setNotification }: LoginFormProps) {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Logging in with:', { username, password });
-  };
+  const { login, loading } = useSystemEvents();
 
-  const switchToRegister = () => {
-    console.log('switching from login page to register page...');
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Basic validation
+    if (!email || !password) {
+      setNotification({
+        open: true,
+        message: 'Email and password are required',
+        severity: 'error',
+      });
+      return;
+    }
+
+    // Call login function from useSystemEvents hook
+    const result = await login({ email, password });
+
+    if (result.success) {
+      setNotification({
+        open: true,
+        message: 'Login successful! Redirecting to lobby...',
+        severity: 'success',
+      });
+
+      // Store user info in localStorage or session for auth state
+      if (result.user) {
+        localStorage.setItem('user', JSON.stringify(result.user));
+      }
+
+      // Redirect to lobby after successful login
+      setTimeout(() => {
+        router.push('/lobby');
+      }, 1000);
+    } else {
+      setNotification({
+        open: true,
+        message: result.message || 'Login failed',
+        severity: 'error',
+      });
+    }
   };
 
   return (
@@ -64,47 +88,46 @@ export default function LoginForm() {
       <form style={{ width: '100%' }} onSubmit={handleLogin}>
         <TextField
           fullWidth
-          label="Username"
+          label="Email"
+          type="email"
           variant="filled"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: '#000000' }, mb: 2 }}
           InputLabelProps={{ style: { color: '#262626' } }}
+          required
         />
 
         <TextField
           fullWidth
           label="Password"
+          type="password"
           variant="filled"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: '#000000' }, mb: 2 }}
           InputLabelProps={{ style: { color: '#262626' } }}
+          required
         />
 
-        <Link href={{ pathname: '/login' }}>
-          {/* temporary link, later change to main page after merging*/}
-          <Button
-            fullWidth
-            type="submit"
-            variant="contained"
-            sx={{
-              bgcolor: '#262626',
-              color: '#B3B3B3',
-              '&:hover': { bgcolor: '#1E1E1E', color: 'white' },
-              py: 1.5,
-              fontWeight: 'bold',
-            }}
-          >
-            Login
-          </Button>
-        </Link>
+        <Button
+          fullWidth
+          type="submit"
+          variant="contained"
+          disabled={loading}
+          sx={{
+            bgcolor: '#262626',
+            color: '#B3B3B3',
+            '&:hover': { bgcolor: '#1E1E1E', color: 'white' },
+            py: 1.5,
+            fontWeight: 'bold',
+          }}
+        >
+          {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
+        </Button>
       </form>
       <Link href={{ pathname: '/register' }}>
-        <Button
-          onClick={switchToRegister}
-          sx={{ mt: 2, fontSize: '0.875rem', color: 'blue', textTransform: 'none' }}
-        >
+        <Button sx={{ mt: 2, fontSize: '0.875rem', color: 'blue', textTransform: 'none' }}>
           Don&#39;t have an account? Register
         </Button>
       </Link>
