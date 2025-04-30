@@ -70,8 +70,13 @@ const CompactLeaderboard = () => {
   };
 
   return (
-    <Box display="flex" alignItems="flex-end" justifyContent="flex-end">
-      <Stack mb={1} sx={{ width: 220 }}>
+    <Box
+      display="flex"
+      alignItems="flex-end"
+      justifyContent="flex-end"
+      sx={{ mb: { xs: '1px', md: '10px' } }}
+    >
+      <Stack mb={1} sx={{ width: { xs: 320, md: 465 } }}>
         {players.map((player) => (
           <Box
             key={player.id}
@@ -80,27 +85,37 @@ const CompactLeaderboard = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'flex-end',
+              mb: 0.6,
             }}
           >
-            <Typography align="right" variant="caption" width="70px">
-              {player.username}
+            <Typography
+              align="right"
+              variant="caption"
+              width="100px"
+              sx={{ fontSize: { xs: '14px', md: '16px' } }}
+            >
+              {player.username}&nbsp;
             </Typography>
             <LinearProgress
               variant="determinate"
               value={(player.hp / player.maxHp) * 100}
               sx={{
-                maxWidth: 120,
-                width: '100%',
+                width: { xs: 200, md: 300 },
                 margin: '0 auto',
-                height: 6,
-                borderRadius: 0.2,
+                height: 10,
+                borderRadius: 0.6,
                 backgroundColor: '#909090',
                 '& .MuiLinearProgress-bar': {
                   backgroundColor: getHpColor(player.hp, player.maxHp),
                 },
               }}
             />
-            <Typography align="center" width="15px" variant="caption">
+            <Typography
+              align="center"
+              variant="caption"
+              width="30px"
+              sx={{ fontSize: { xs: '14px', md: '16px' } }}
+            >
               {player.hp}
             </Typography>
           </Box>
