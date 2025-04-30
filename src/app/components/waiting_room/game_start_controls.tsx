@@ -39,18 +39,21 @@ const GameStartControls: React.FC<GameStartControlsProps> = ({ isHost, onStart, 
           </Button>
         </Box>
         <Grid item>
-          <Button
-            variant="contained"
-            onClick={onStart}
-            disabled={!isHost}
-            sx={{
-              backgroundColor: 'green',
-              '&:hover': { backgroundColor: 'darkgreen' },
-              ...trapeziumStyle,
-            }}
-          >
-            Start
-          </Button>
+          {isHost ? (
+            <Button
+              variant="contained"
+              onClick={onStart}
+              sx={{
+                backgroundColor: 'green',
+                '&:hover': { backgroundColor: 'darkgreen' },
+                ...trapeziumStyle,
+              }}
+            >
+              Start
+            </Button>
+          ) : (
+            <Box sx={{ visibility: 'hidden' }}>&nbsp;</Box>
+          )}
         </Grid>
       </Grid>
     </Box>

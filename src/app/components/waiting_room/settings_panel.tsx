@@ -51,23 +51,50 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   // Style objects for consistent appearance.
   const textFieldSX = {
     '& .MuiOutlinedInput-root': {
-      '& fieldset': { borderColor: 'black' },
+      '& fieldset': { borderColor: 'black' }, // default
       '&:hover fieldset': { borderColor: 'black' },
       '&.Mui-focused fieldset': { borderColor: 'black' },
+      '&.Mui-disabled fieldset': { borderColor: 'black' },
     },
-    '& input': { color: 'black' },
-    '& label': { color: 'black' },
-    '& label.Mui-focused': { color: 'black' },
+    '& .MuiInputBase-input': {
+      color: 'black',
+      '&.Mui-disabled': {
+        color: '#262626',
+        WebkitTextFillColor: '#262626',
+      },
+    },
+    '& label': {
+      color: 'black',
+      '&.Mui-disabled': { color: 'black' },
+      '&.Mui-focused': { color: 'black' },
+    },
   };
 
   const FormControlSX = {
-    '& .MuiSelect-icon': { color: 'black' },
-    '& .MuiSelect-select': { color: 'black' },
-    '& .MuiFormLabel-root': { color: 'black' },
     '& .MuiOutlinedInput-root': {
       '& fieldset': { borderColor: 'black' },
       '&:hover fieldset': { borderColor: 'black' },
       '&.Mui-focused fieldset': { borderColor: 'black' },
+      '&.Mui-disabled fieldset': { borderColor: 'black' },
+    },
+    '& .MuiSelect-select': {
+      color: 'black',
+      '&.Mui-disabled': {
+        color: 'black',
+        WebkitTextFillColor: 'black',
+      },
+    },
+    '& .MuiSelect-icon': {
+      color: 'black',
+      '&.Mui-disabled': {
+        color: 'black',
+      },
+    },
+    '& .MuiFormLabel-root': {
+      color: 'black',
+      '&.Mui-disabled': {
+        color: 'black',
+      },
     },
   };
 
