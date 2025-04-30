@@ -3,56 +3,72 @@
 import { useState } from 'react';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-//import { useRouter } from 'next/navigation';
+import { Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
 
-import { Box, Button, TextField, Typography } from '@mui/material';
+import useSystemEvents from '../../hooks/useSystemEvents';
 
-/**
- * RegisterForm Component
- *
- * A component that provides a registration form for new users.
- * It includes input fields for email, username, and password (with confirmation),
- * as well as submission and navigation functionality.
- *
- * @component
- * @example
- * ```tsx
- * <RegisterForm />
- * ```
- *
- * @returns {TSX.Element} A styled registration form with email, username,
- * password inputs, a register button, and a link to switch to the login page.
- *
- * @remarks
- * The form validates that the password and confirmation password match before submission.
- * After successful registration, the user is redirected to the login page.
- */
-export default function RegisterForm() {
-  // const router = useRouter(); // Initialize the router
+interface RegisterFormProps {
+  setNotification: (notification: {
+    open: boolean;
+    message: string;
+    severity: 'success' | 'error';
+  }) => void;
+}
+
+export default function RegisterForm({ setNotification }: RegisterFormProps) {
+  const router = useRouter(); // Initialize the router
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  /* Need to implement later:
-  1. Email system
-  2. Check Username availability
-  3. if failed to register, stop the Link to /login
-  */
-  const handleRegister = (e: React.FormEvent) => {
+  const { register, loading } = useSystemEvents();
+
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      alert('Passwords do not match!');
+
+    // Basic form validation
+    if (!email || !username || !password) {
+      setNotification({
+        open: true,
+        message: 'All fields are required',
+        severity: 'error',
+      });
       return;
     }
-    console.log('Registering with:', { username, password });
-    // router.push('/login');
-  };
 
-  const switchToLogin = () => {
-    console.log('Switching to login...');
-    //router.push('/login');
+    if (password !== confirmPassword) {
+      setNotification({
+        open: true,
+        message: 'Passwords do not match!',
+        severity: 'error',
+      });
+      return;
+    }
+
+    // Call register function from hook
+    const result = await register({ email, username, password });
+
+    if (result.success) {
+      setNotification({
+        open: true,
+        message: 'Registration successful! Redirecting to login...',
+        severity: 'success',
+      });
+
+      // Redirect to login page after successful registration
+      setTimeout(() => {
+        router.push('/login');
+      }, 1500);
+    } else {
+      setNotification({
+        open: true,
+        message: result.message || 'Registration failed',
+        severity: 'error',
+      });
+    }
   };
 
   return (
@@ -82,6 +98,7 @@ export default function RegisterForm() {
           onChange={(e) => setEmail(e.target.value)}
           sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: '#000000' }, mb: 2 }}
           InputLabelProps={{ style: { color: '#262626' } }}
+          required
         />
         <TextField
           fullWidth
@@ -91,6 +108,7 @@ export default function RegisterForm() {
           onChange={(e) => setUsername(e.target.value)}
           sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: '#000000' }, mb: 2 }}
           InputLabelProps={{ style: { color: '#262626' } }}
+          required
         />
         <TextField
           fullWidth
@@ -101,6 +119,7 @@ export default function RegisterForm() {
           onChange={(e) => setPassword(e.target.value)}
           sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: '#000000' }, mb: 2 }}
           InputLabelProps={{ style: { color: '#262626' } }}
+          required
         />
         <TextField
           fullWidth
@@ -111,29 +130,26 @@ export default function RegisterForm() {
           onChange={(e) => setConfirmPassword(e.target.value)}
           sx={{ bgcolor: '#D9D9D9', borderRadius: 1, input: { color: '#000000' }, mb: 2 }}
           InputLabelProps={{ style: { color: '#262626' } }}
+          required
         />
-        <Link href={{ pathname: '/login' }}>
-          <Button
-            fullWidth
-            type="submit"
-            variant="contained"
-            sx={{
-              bgcolor: '#262626',
-              color: '#B3B3B3',
-              '&:hover': { bgcolor: '#1E1E1E', color: 'white' },
-              py: 1.5,
-              fontWeight: 'bold',
-            }}
-          >
-            Register
-          </Button>
-        </Link>
+        <Button
+          fullWidth
+          type="submit"
+          variant="contained"
+          disabled={loading}
+          sx={{
+            bgcolor: '#262626',
+            color: '#B3B3B3',
+            '&:hover': { bgcolor: '#1E1E1E', color: 'white' },
+            py: 1.5,
+            fontWeight: 'bold',
+          }}
+        >
+          {loading ? <CircularProgress size={24} color="inherit" /> : 'Register'}
+        </Button>
       </form>
       <Link href={{ pathname: '/login' }}>
-        <Button
-          onClick={switchToLogin}
-          sx={{ mt: 2, fontSize: '0.875rem', color: 'blue', textTransform: 'none' }}
-        >
+        <Button sx={{ mt: 2, fontSize: '0.875rem', color: 'blue', textTransform: 'none' }}>
           Already have an account? Login
         </Button>
       </Link>
