@@ -1,129 +1,179 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import Link from 'next/link';
 
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Box, Button, Grid2, TextField, Typography } from '@mui/material';
 
-const Lobby = () => {
+export default function GameJoinPage() {
+  const [username, setUsername] = useState('');
+  const [roomCode, setRoomCode] = useState('');
+
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        minHeight: '100vh',
-        minWidth: '100vw',
-        padding: 2,
-      }}
-    >
-      {/* Top bar with logo (left) and course title (right) */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mt: 0.5,
-        }}
-      >
-        <Box>
-          {/* TO BE IMPLEMENTED: <img src="/logo.png" alt="Fill in the Math Logo" style={{ height: '50px' }} /> */}
-        </Box>
-        <Box>
-          <Typography sx={{ color: '#ffffff' }}>CSCI3100 Software&nbsp;Engineering</Typography>
-        </Box>
+    <Box sx={{ position: 'relative', minHeight: '100vh', minWidth: '100vw' }}>
+      {/* Top Right Information Box */}
+      <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+        <Typography variant="subtitle1">CSCI3100 Software Engineering</Typography>
+      </Box>
+      {/* Bottom Left Information Box */}
+      <Box sx={{ position: 'absolute', bottom: 16, left: 16 }}>
+        <Typography variant="subtitle1">Created by Group B8</Typography>
       </Box>
 
+      {/* Central Container */}
       <Box
         sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
           display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
           flexDirection: 'column',
-          textAlign: 'center',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
         }}
       >
-        {/* Title */}
-        <Typography variant="h4" sx={{ color: '#ffffff', mb: 2 }}>
-          Fill in the Math
-        </Typography>
-
-        {/* Center box with prompt and buttons */}
         <Box
-          bgcolor={'#ffffff'}
-          width={{ xs: '400px', md: '600px' }}
-          height={{ xs: '120px', md: '144px' }}
-          borderRadius={2}
+          bgcolor="#ffffff"
+          borderRadius={4}
+          height={{ xs: '200px', sm: '240px' }}
+          width={{ xs: '400px', sm: '600px' }}
         >
-          <Typography
+          {/* Username Input Box (background white) */}
+          <Grid2
+            container
+            height={{ xs: '100px', sm: '120px' }}
+            alignContent={'center'}
+            justifyContent="center"
+            flexDirection={'row'}
+          >
+            <Grid2 mt={2.25} mr={0.5}>
+              <Typography color="#000000" fontSize={{ xs: '20px', sm: '24px' }} sx={{ mb: 2 }}>
+                Username:
+              </Typography>
+            </Grid2>
+            <Grid2>
+              <TextField
+                variant="outlined"
+                placeholder="player 1"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    mt: 1.5,
+                    borderRadius: 2,
+                    backgroundColor: '#262626',
+                    height: { xs: '40px', sm: '48px' },
+                    width: { xs: '150px', sm: '180px' },
+                  },
+                }}
+              />
+            </Grid2>
+          </Grid2>
+
+          {/* Bottom Section: 3 Buttons */}
+          <Box
             sx={{
-              fontSize: { xs: '20px', md: '24px' },
-              m: { xs: 1.875, md: 2.25 },
-              color: '#000000',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            please select
-          </Typography>
-          <Grid container justifyContent="center">
-            <Box>
-              <Link href="/game" passHref>
-                <Button
-                  variant="contained"
-                  sx={{
-                    fontSize: { xs: '1rem', md: '1.2rem' },
-                    borderRadius: '0 0 0 8px',
-                    backgroundColor: '#919191',
-                    '&:hover': { backgroundColor: '#7a7a7a' },
-                    width: { xs: '200px', md: '300px' },
-                    height: { xs: '60px', md: '72px' },
-                  }}
-                >
-                  Play&nbsp;as&nbsp;Guest
-                </Button>
-              </Link>
-            </Box>
-            <Box>
-              <Link href="/login" passHref>
-                <Button
-                  variant="contained"
-                  fullWidth
-                  sx={{
-                    fontSize: { xs: '1rem', md: '1.2rem' },
-                    borderRadius: '0 0 8px 0',
-                    backgroundColor: '#919191',
-                    '&:hover': { backgroundColor: '#7a7a7a' },
-                    width: { xs: '200px', md: '300px' },
-                    height: { xs: '60px', md: '72px' },
-                  }}
-                >
-                  Login/Register
-                </Button>
-              </Link>
-            </Box>
-          </Grid>
-        </Box>
-        {/* Title */}
-        <Typography variant="h4" sx={{ color: 'transparent', mb: 2 }}>
-          .
-        </Typography>
-      </Box>
+            {/* Quick Join Button (left) */}
+            <Link href="/waiting_room" style={{ textDecoration: 'none' }}>
+              <Button
+                variant="contained"
+                sx={{
+                  height: { xs: '100px', sm: '120px' },
+                  width: { xs: '120px', sm: '144px' },
+                  backgroundColor: '#919191',
+                  color: '#1E1E1E',
+                  borderRadius: '0 0 0 16px',
+                  '&:hover': { backgroundColor: '#7a7a7a' },
+                }}
+              >
+                <Typography fontSize={{ xs: '16px', sm: '20px' }} letterSpacing="-1px">
+                  Quick&nbsp;Join
+                </Typography>
+              </Button>
+            </Link>
 
-      {/* Bottom left information */}
-      <Box sx={{ position: 'fixed', bottom: 16, left: 16 }}>
-        <Typography variant="body1" sx={{ color: '#ffffff' }}>
-          Created by Group B8 <br></br> 1155194693&nbsp;Kwok&nbsp;Ka&nbsp;Ming&nbsp;|
-          1155194687&nbsp;Lau&nbsp;Tsun&nbsp;Shing&nbsp;|
-          1155190674&nbsp;Nagi&nbsp;Ka&nbsp;Shing&nbsp;|
-          <br></br>1155189319&nbsp;Cheng&nbsp;Jonathan&nbsp;Yue&nbsp;Ming |
-          1155192782&nbsp;Chan&nbsp;Jackson&nbsp;|
-        </Typography>
+            {/* Host Game Button (center) */}
+            <Link href="/waiting_room?host=true" style={{ textDecoration: 'none' }}>
+              <Button
+                variant="contained"
+                sx={{
+                  height: { xs: '100px', sm: '120px' },
+                  width: { xs: '120px', sm: '144px' },
+                  backgroundColor: '#919191',
+                  color: '#1E1E1E',
+                  borderRadius: '0 0 0 0',
+                  '&:hover': { backgroundColor: '#7a7a7a' },
+                }}
+              >
+                <Typography fontSize={{ xs: '16px', sm: '20px' }} letterSpacing="-1px">
+                  Host&nbsp;Game
+                </Typography>
+              </Button>
+            </Link>
+
+            {/* Join Existing Game Room: Input field above button (right) */}
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}
+            >
+              <Link href={roomCode ? `/waiting_room?roomId=${roomCode}` : '#'}>
+                <Button
+                  variant="contained"
+                  sx={{
+                    height: { xs: '100px', sm: '120px' },
+                    width: { xs: '160px', sm: '312px' },
+                    backgroundColor: '#919191',
+                    color: '#1E1E1E',
+                    borderRadius: '0 0 16px 0',
+                    '&:hover': { backgroundColor: '#7a7a7a' },
+                  }}
+                >
+                  <Grid2
+                    container
+                    alignContent={'center'}
+                    justifyContent="center"
+                    flexDirection={{ xs: 'column', sm: 'row' }}
+                  >
+                    <Typography
+                      fontSize={{ xs: '16px', sm: '20px' }}
+                      letterSpacing="-1px"
+                      mr={{ xs: '1px', sm: '4px' }}
+                      mt={{ sm: '8px' }}
+                    >
+                      Join&nbsp;Game:
+                    </Typography>
+                    <TextField
+                      variant="outlined"
+                      placeholder="Enter code"
+                      value={roomCode}
+                      onChange={(e) => setRoomCode(e.target.value)}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          backgroundColor: '#262626',
+                          height: { xs: '40px', sm: '48px' },
+                          width: { xs: '120px', sm: '155px' },
+                        },
+                        '& input::placeholder': {
+                          letterSpacing: '-1.5px',
+                          textAlign: 'center',
+                        },
+                      }}
+                    />
+                  </Grid2>
+                </Button>
+              </Link>
+            </Box>
+          </Box>
+        </Box>
       </Box>
     </Box>
   );
-};
-
-export default Lobby;
+}
