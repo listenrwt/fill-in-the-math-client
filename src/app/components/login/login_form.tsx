@@ -40,7 +40,7 @@ export default function LoginForm({ setNotification }: LoginFormProps) {
       return;
     }
 
-    // Call login function from PostgreSQL hook
+    // Call login function from useSystemEvents hook
     const result = await login({ email, password });
 
     if (result.success) {
