@@ -36,6 +36,7 @@ const InGameTimer = ({ duration = 30 }: InGameTimerProps) => {
           color: '#ffffff',
           fontWeight: 'bold',
           textAlign: 'center',
+          fontSize: { xs: '24px', md: '28px' },
         }}
         mb={1}
       >
