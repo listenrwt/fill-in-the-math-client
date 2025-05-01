@@ -83,7 +83,14 @@ const UserProfile: React.FC<UserProfileProps> = ({ username, avatarId, experienc
           <LinearProgress
             variant="determinate"
             value={progress}
-            sx={{ height: { xs: 12, md: 20 }, borderRadius: { xs: '4px', md: '8px' } }}
+            sx={{
+              height: { xs: 12, md: 20 },
+              borderRadius: { xs: '4px', md: '8px' },
+              backgroundColor: '#FFFFFF',
+              '& .MuiLinearProgress-bar': {
+                backgroundColor: '#00AA00',
+              },
+            }}
           />
           <Typography
             variant="caption"
