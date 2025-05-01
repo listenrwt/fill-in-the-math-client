@@ -6,6 +6,8 @@ import Link from 'next/link';
 
 import { Box, Button, Grid2, TextField, Typography } from '@mui/material';
 
+import UserProfile from '../components/lobby/UserProfile';
+
 export default function GameJoinPage() {
   const [username, setUsername] = useState('');
   const [roomCode, setRoomCode] = useState('');
@@ -14,7 +16,11 @@ export default function GameJoinPage() {
     <Box sx={{ position: 'relative', minHeight: '100vh', minWidth: '100vw' }}>
       {/* Top Right Information Box */}
       <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
-        <Typography variant="subtitle1">CSCI3100 Software Engineering</Typography>
+        <UserProfile
+          username="Bruh"
+          avatarId={1}
+          experience={10000} // Sample experience value here
+        />
       </Box>
       {/* Bottom Left Information Box */}
       <Box sx={{ position: 'absolute', bottom: 16, left: 16 }}>
