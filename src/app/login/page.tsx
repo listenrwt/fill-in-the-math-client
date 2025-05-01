@@ -4,8 +4,6 @@ import { Grid2 } from '@mui/material';
 
 import LoginForm from '../components/login/login_form';
 
-// Remember the guest mode button
-
 export default function Page() {
   return (
     <Grid2

@@ -1,9 +1,12 @@
 import type { Metadata } from 'next';
 
-import { ThemeProvider } from '@mui/material';
+import { Box, ThemeProvider } from '@mui/material';
 
+import Logo from './components/logo';
 import './globals.css';
 import theme from './theme';
+
+// adjust path if needed
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -18,7 +21,20 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ThemeProvider theme={theme}>{children}</ThemeProvider>
+        <ThemeProvider theme={theme}>
+          <Logo />
+          {/* Main content with top padding to avoid logo overlap */}
+          <Box
+            sx={{
+              paddingLeft: 0,
+              paddingRight: 0,
+              margin: 0,
+              overflowX: 'hidden', // prevent scrollbar caused by logo
+            }}
+          >
+            {children}
+          </Box>
+        </ThemeProvider>
       </body>
     </html>
   );

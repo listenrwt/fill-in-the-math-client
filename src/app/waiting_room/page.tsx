@@ -21,7 +21,7 @@ export default function WaitingRoomPage() {
     isHost: boolean;
     avatarID?: number;
   }
-  const [roomId, setRoomId] = useState('u1g92c2');
+  const [roomId, setRoomId] = useState('123456');
   const [players, setPlayers] = useState<Player[]>([]);
   const [isHost, setIsHost] = useState(true);
 
@@ -88,10 +88,18 @@ export default function WaitingRoomPage() {
       justifyContent="space-between"
     >
       <Grid2></Grid2>
-      <Grid2 container direction="column" justifyContent="center" sx={{ alignSelf: 'center' }}>
+      <Grid2
+        container
+        direction="column"
+        justifyContent="center"
+        sx={{
+          alignSelf: 'center',
+          letterSpacing: { xs: '-0.8px', sm: '0' },
+        }}
+      >
         {/* Top Section: Room Name and ID */}
         <Box sx={{ p: 2, textAlign: 'center' }}>
-          <Typography variant="h4">Room Code:&nbsp;{roomId}</Typography>
+          <Typography variant="h4">Room Code:{roomId}</Typography>
         </Box>
         {/* Status */}
         <Box width="100%" maxWidth={900} sx={{ p: 2, textAlign: { xs: 'center', md: 'right' } }}>

@@ -20,14 +20,11 @@ const Lobby = () => {
       <Box
         sx={{
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           alignItems: 'center',
           mt: 0.5,
         }}
       >
-        <Box>
-          {/* TO BE IMPLEMENTED: <img src="/logo.png" alt="Fill in the Math Logo" style={{ height: '50px' }} /> */}
-        </Box>
         <Box>
           <Typography sx={{ color: '#ffffff' }}>CSCI3100 Software&nbsp;Engineering</Typography>
         </Box>
