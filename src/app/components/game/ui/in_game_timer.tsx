@@ -1,35 +1,40 @@
-// You can add more props to the component if needed.
-// TODO: Implement Timer component
-// Note: Don't forget the timer bar.
-import { useEffect, useState } from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 
 import { Box, LinearProgress, Typography } from '@mui/material';
 
 interface InGameTimerProps {
-  duration?: number; // Total time in seconds (default: 30)
+  duration?: number; // total time in seconds, default: 30
+  onTimerComplete?: () => void; // callback for when the timer expires
 }
 
-const InGameTimer = ({ duration = 30 }: InGameTimerProps) => {
+const InGameTimer = ({ duration = 30, onTimerComplete }: InGameTimerProps) => {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [progress, setProgress] = useState(100);
 
+  // Start the timer once on mount.
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-      setProgress((prev) => (prev > 0 ? prev - 100 / duration : 0));
+      setTimeLeft((prev) => Math.max(prev - 1, 0));
+      setProgress((prev) => Math.max(prev - 100 / duration, 0));
     }, 1000);
 
     return () => clearInterval(timer);
   }, [duration]);
 
+  // When timeLeft reaches 0, schedule the parent's callback outside render.
+  useEffect(() => {
+    if (timeLeft === 0 && onTimerComplete) {
+      // Using setTimeout to ensure the callback is executed after the render.
+      setTimeout(() => {
+        onTimerComplete();
+      }, 0);
+    }
+  }, [timeLeft, onTimerComplete]);
+
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      {/* Timer Text */}
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <Typography
         variant="h6"
         sx={{
@@ -42,8 +47,6 @@ const InGameTimer = ({ duration = 30 }: InGameTimerProps) => {
       >
         Time Left: {timeLeft} {timeLeft === 1 ? 'second' : 'seconds'}
       </Typography>
-
-      {/* Timer Progress Bar */}
       <LinearProgress
         variant="determinate"
         value={progress}

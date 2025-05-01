@@ -1,15 +1,25 @@
+// File: components/waiting_room/game_start_controls.tsx
 import React from 'react';
 
 import { Box, Button, Grid } from '@mui/material';
 
 interface GameStartControlsProps {
   isHost: boolean;
+  gameStatus?: string; // New prop to know the current game status
   onStart: () => void;
   onLeave: () => void;
+  // Callback to show the waiting room panel (player list and settings)
+  onPlayAgain?: () => void;
 }
 
-const GameStartControls: React.FC<GameStartControlsProps> = ({ isHost, onStart, onLeave }) => {
-  // Define a common sx style for the trapezium shape
+const GameStartControls: React.FC<GameStartControlsProps> = ({
+  isHost,
+  gameStatus,
+  onStart,
+  onLeave,
+  onPlayAgain,
+}) => {
+  // Common trapezium-shaped button style.
   const trapeziumStyle = {
     clipPath: 'polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%)',
     position: 'relative',
@@ -19,8 +29,9 @@ const GameStartControls: React.FC<GameStartControlsProps> = ({ isHost, onStart, 
   };
 
   return (
-    <Box width="100%" sx={{ textAlign: 'center' }}>
+    <Box width="100%" sx={{ textAlign: 'center', position: 'relative' }}>
       <Grid container spacing={2} justifyContent="center">
+        {/* Left: Leave Button */}
         <Box sx={{ position: 'absolute', left: 0, bottom: 0 }}>
           <Button
             variant="outlined"
@@ -39,8 +50,9 @@ const GameStartControls: React.FC<GameStartControlsProps> = ({ isHost, onStart, 
             Leave
           </Button>
         </Box>
+        {/* Center: Start Button only shows if host and game status is not "Ended" */}
         <Grid item>
-          {isHost ? (
+          {isHost && gameStatus !== 'Ended' ? (
             <Button
               variant="contained"
               onClick={onStart}
@@ -57,6 +69,28 @@ const GameStartControls: React.FC<GameStartControlsProps> = ({ isHost, onStart, 
           )}
         </Grid>
       </Grid>
+
+      {/* Bottom-Right Button: Show Lobby button */}
+      {onPlayAgain && (
+        <Box sx={{ position: 'absolute', right: 0, bottom: 0 }}>
+          <Button
+            variant="outlined"
+            onClick={onPlayAgain}
+            sx={{
+              borderColor: 'green',
+              bgcolor: 'green',
+              color: 'black',
+              '&:hover': {
+                borderColor: 'darkgreen',
+                backgroundColor: 'darkgreen',
+              },
+              ...trapeziumStyle,
+            }}
+          >
+            Play Again
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };
