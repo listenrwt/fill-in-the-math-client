@@ -1,6 +1,10 @@
-import { Divider } from '@mui/material';
+import { Divider, SxProps } from '@mui/material';
 
-export default function GameContainer() {
+interface GameContainerProps {
+  sx?: SxProps;
+}
+
+export default function GameContainer({ sx }: GameContainerProps) {
   return (
     <Divider
       sx={{
@@ -10,6 +14,7 @@ export default function GameContainer() {
         width: '90%',
         alignContent: 'center',
         margin: '0 auto',
+        ...sx, // override or add to default styles
       }}
     />
   );
