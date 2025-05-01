@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Box, Button, Grid, alpha } from '@mui/material';
+import { Box, Button, Grid } from '@mui/material';
 
 interface GameStartControlsProps {
   isHost: boolean;
@@ -30,7 +30,8 @@ const GameStartControls: React.FC<GameStartControlsProps> = ({ isHost, onStart, 
               bgcolor: '#919191',
               color: '#1E1E1E',
               '&:hover': {
-                backgroundColor: alpha('#919191', 0.8),
+                borderColor: '#777777',
+                backgroundColor: '#777777',
               },
               ...trapeziumStyle,
             }}
