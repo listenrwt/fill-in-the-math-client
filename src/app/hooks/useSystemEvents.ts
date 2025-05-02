@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { AuthResponse, LoginCredentials, RegistrationData } from '../../lib/system.types';
+import { AuthResponse, LoginCredentials, RegistrationData, UserData } from '../../lib/system.types';
 
 /**
  * Custom hook for handling system events via API
@@ -82,6 +82,46 @@ export function useSystemEvents() {
   };
 
   /**
+   * Fetch current user data from the server
+   * @returns User data response object
+   */
+  const getUserData = async (): Promise<{ success: boolean; message: string; user?: UserData }> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/user`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Important for cookies
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || 'Failed to retrieve user data');
+        return { success: false, message: data.message || 'Failed to retrieve user data' };
+      }
+
+      // If successful, update local storage with fresh data
+      if (data.success && data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+
+      return data;
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'An error occurred while fetching user data';
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
    * Logout the current user by clearing the session
    */
   const logout = async (): Promise<{ success: boolean; message: string }> => {
@@ -122,6 +162,7 @@ export function useSystemEvents() {
     login,
     register,
     logout,
+    getUserData,
     loading,
     error,
   };

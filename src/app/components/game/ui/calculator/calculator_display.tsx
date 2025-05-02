@@ -1,20 +1,51 @@
-// You can add more props to the component if needed.
-// Display the question to the user properly with provided question]
-// Example: [1, MathSymbol.Addition , 2, MathSymbol.Multiplication, MathSymbol.Blank, MathSymbol.Equals, 4]
-// Result: 1 + 2 * ? = 4
+'use client';
+
 import { Box, Typography } from '@mui/material';
 
 import { MathSymbol } from '@/lib/question.enum';
-import { Equation } from '@/lib/question.types';
 
 interface CalculatorDisplayProps {
-  question: Equation;
+  equation: (number | MathSymbol)[];
+  answer?: number[]; // Add answer array as optional prop
 }
 
-const CalculatorDisplay = ({ question }: CalculatorDisplayProps) => {
-  if (!question) {
+const CalculatorDisplay = ({ equation, answer = [] }: CalculatorDisplayProps) => {
+  if (!equation || equation.length === 0) {
     return <Typography color="error">Error: No question provided</Typography>;
   }
+
+  // Helper function to convert MathSymbol to display character
+  const getDisplayValue = (item: number | MathSymbol): string => {
+    switch (item) {
+      case MathSymbol.Addition:
+        return '+';
+      case MathSymbol.Subtraction:
+        return '-';
+      case MathSymbol.Multiplication:
+        return '×';
+      case MathSymbol.Division:
+        return '÷';
+      case MathSymbol.Equals:
+        return '=';
+      case MathSymbol.Blank:
+        return '?';
+      default:
+        return String(item);
+    }
+  };
+
+  // Create a display version of the equation with answers filled in
+  const displayEquation = [...equation];
+  let answerIndex = 0;
+
+  for (let i = 0; i < displayEquation.length; i++) {
+    if (displayEquation[i] === MathSymbol.Blank && answerIndex < answer.length) {
+      // Replace the blank with the corresponding answer
+      displayEquation[i] = answer[answerIndex];
+      answerIndex++;
+    }
+  }
+
   return (
     <Box
       sx={{
@@ -23,25 +54,32 @@ const CalculatorDisplay = ({ question }: CalculatorDisplayProps) => {
         alignItems: 'center',
         p: 2,
         borderRadius: 2,
+        flexWrap: 'wrap',
       }}
     >
-      {question.map((item, index) => (
-        <Box
-          key={index}
-          sx={{
-            p: 1,
-            borderRadius: 1,
-            bgcolor: item === MathSymbol.Blank ? '#262626' : 'transparent',
-            color: item === MathSymbol.Blank ? '#ffffff' : '#000000',
-            width: '60px',
-            height: '60px',
-          }}
-        >
-          <Typography sx={{ fontSize: '2rem', textAlign: 'center' }}>
-            {item === MathSymbol.Blank ? '?' : item}
-          </Typography>
-        </Box>
-      ))}
+      {displayEquation.map((item, index) => {
+        const isFilledBlank = equation[index] === MathSymbol.Blank;
+        return (
+          <Box
+            key={index}
+            sx={{
+              p: 1,
+              borderRadius: 1,
+              bgcolor: isFilledBlank ? '#262626' : 'transparent',
+              color: isFilledBlank ? '#ffffff' : '#000000',
+              width: '60px',
+              height: '60px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Typography sx={{ fontSize: '2rem', textAlign: 'center' }}>
+              {getDisplayValue(item)}
+            </Typography>
+          </Box>
+        );
+      })}
     </Box>
   );
 };

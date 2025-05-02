@@ -1,79 +1,50 @@
-import { useState } from 'react';
-
 import { Box, Typography } from '@mui/material';
 
-import { MathSymbol } from '@/lib/question.enum';
-import { Equation } from '@/lib/question.types';
+import { Question } from '@/lib/game.types';
 
 import GameAction from './ui/action/game_action';
 import CalculatorDisplay from './ui/calculator/calculator_display';
 import CalculatorPanel from './ui/calculator/calculator_panel';
-import Stroke from './ui/stroke';
+import { Stroke } from './ui/stroke';
 
-export default function GameContainer() {
-  const initialQuestion: Equation = [
-    MathSymbol.Blank,
-    MathSymbol.Subtraction,
-    6,
-    MathSymbol.Addition,
-    MathSymbol.Blank,
-    MathSymbol.Equals,
-    2,
-  ];
+interface GameContainerProps {
+  currentQuestion: Question | null;
+  answer: number[];
+  setAnswer: (answer: number[]) => void;
+  submitAnswer: () => void;
+  performHeal: () => void;
+  performAttack: (targetId: string) => void;
+  canPerformAction: boolean;
+  health: number;
+}
 
-  const [question, setQuestion] = useState<Equation>(initialQuestion);
-  const [filledIndexes, setFilledIndexes] = useState<number[]>([]);
-  const [usedNumbers, setUsedNumbers] = useState<number[]>([]);
-  const [showGameAction, setShowGameAction] = useState(false);
+export default function GameContainer({
+  currentQuestion,
+  answer,
+  setAnswer,
+  submitAnswer,
+  performHeal,
+  performAttack,
+  canPerformAction,
+}: GameContainerProps) {
+  // Show game action UI when the user can perform an action (answered correctly)
+  // or show the calculator UI when they need to answer a question
 
   const handleNumberClick = (num: number) => {
-    setQuestion((prevQuestion) => {
-      const firstBlankIndex = prevQuestion.indexOf(MathSymbol.Blank);
-      if (firstBlankIndex === -1) return prevQuestion;
+    // Check if this number is already used
+    if (answer.includes(num)) return;
 
-      const newQuestion = prevQuestion.map((item, index) =>
-        index === firstBlankIndex ? num : item
-      );
-
-      setFilledIndexes((prevIndexes) => [...prevIndexes, firstBlankIndex]);
-      // Add the number to usedNumbers list
-      setUsedNumbers((prev) => [...prev, num]);
-
-      return newQuestion;
-    });
+    // Add the number to the answer array
+    setAnswer([...answer, num]);
   };
 
   const handleClear = () => {
-    setQuestion(initialQuestion);
-    setFilledIndexes([]);
-    setUsedNumbers([]);
+    setAnswer([]);
   };
 
   const handleBackspace = () => {
-    if (filledIndexes.length === 0) return;
-
-    setQuestion((prevQuestion) => {
-      const lastFilledIndex = filledIndexes[filledIndexes.length - 1];
-      // Get the number being removed to also remove it from usedNumbers
-      const numberBeingRemoved = prevQuestion[lastFilledIndex];
-
-      const newQuestion = [...prevQuestion];
-      newQuestion[lastFilledIndex] = MathSymbol.Blank;
-
-      setFilledIndexes((prevIndexes) => prevIndexes.slice(0, -1));
-      // Remove the number from usedNumbers list
-      setUsedNumbers((prev) =>
-        prev.filter((_, i) => i !== prev.indexOf(numberBeingRemoved as number))
-      );
-
-      return newQuestion;
-    });
-  };
-
-  const handleSubmit = () => {
-    if (!question.includes(MathSymbol.Blank)) {
-      setShowGameAction(true);
-    }
+    if (answer.length === 0) return;
+    setAnswer(answer.slice(0, -1));
   };
 
   return (
@@ -87,25 +58,28 @@ export default function GameContainer() {
       }}
     >
       <Box sx={{ borderRadius: 2, bgcolor: '#D9D9D9', width: '100%', maxWidth: 1000 }}>
-        {showGameAction ? (
+        {canPerformAction ? (
           <GameAction
-            onActionComplete={() => {
-              setQuestion(initialQuestion);
-              setFilledIndexes([]);
-              setUsedNumbers([]);
-              setShowGameAction(false);
-            }}
+            onActionComplete={() => {}} // This is handled by the context now
+            performAttack={performAttack}
+            performHeal={performHeal}
           />
         ) : (
           <>
-            <CalculatorDisplay question={question} />
+            {currentQuestion && (
+              <CalculatorDisplay
+                equation={currentQuestion.equation_arr}
+                answer={answer} // Pass the answer array to display selected numbers
+              />
+            )}
             <Stroke />
             <CalculatorPanel
               onNumberClick={handleNumberClick}
               onClear={handleClear}
               onDeleteLast={handleBackspace}
-              onSubmit={handleSubmit}
-              usedNumbers={usedNumbers}
+              onSubmit={submitAnswer}
+              usedNumbers={answer}
+              equation={currentQuestion?.equation_arr || []} // Pass equation to limit inputs based on blanks
             />
           </>
         )}
