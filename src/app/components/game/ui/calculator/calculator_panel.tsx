@@ -2,6 +2,9 @@ import React, { useCallback, useEffect } from 'react';
 
 import { Box, Grid } from '@mui/material';
 
+import { MathSymbol } from '@/lib/question.enum';
+import { Equation } from '@/lib/question.types';
+
 import CalculatorButton from './calculator_button';
 
 interface CalculatorPanelProps {
@@ -10,6 +13,7 @@ interface CalculatorPanelProps {
   onDeleteLast: () => void;
   onSubmit: () => void;
   usedNumbers?: number[];
+  equation?: Equation; // Add equation as optional prop
 }
 
 export default function CalculatorPanel({
@@ -18,9 +22,25 @@ export default function CalculatorPanel({
   onDeleteLast,
   onSubmit,
   usedNumbers = [],
+  equation = [],
 }: CalculatorPanelProps) {
+  // Helper function to count the number of blanks in the equation
+  const countBlanks = useCallback((): number => {
+    return equation.filter((item) => item === MathSymbol.Blank).length;
+  }, [equation]);
+
+  // Get the maximum number of inputs allowed
+  const maxInputs = useCallback((): number => {
+    return countBlanks();
+  }, [countBlanks]);
+
   // Wrap isNumberUsed in useCallback to avoid its reference changing on every render.
   const isNumberUsed = useCallback((num: number) => usedNumbers.includes(num), [usedNumbers]);
+
+  // Check if we've reached the maximum number of inputs
+  const isMaxInputsReached = useCallback((): boolean => {
+    return usedNumbers.length >= maxInputs();
+  }, [usedNumbers, maxInputs]);
 
   // Handle keyboard events
   useEffect(() => {
@@ -30,7 +50,7 @@ export default function CalculatorPanel({
       // Handle number keys from 1 to 9
       if (/^[1-9]$/.test(key)) {
         const num = parseInt(key, 10);
-        if (!isNumberUsed(num)) {
+        if (!isNumberUsed(num) && !isMaxInputsReached()) {
           onNumberClick(num);
         }
       }
@@ -48,7 +68,7 @@ export default function CalculatorPanel({
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onNumberClick, onSubmit, onDeleteLast, isNumberUsed]);
+  }, [onNumberClick, onSubmit, onDeleteLast, isNumberUsed, isMaxInputsReached]);
 
   return (
     <Box sx={{ mt: 2, p: 2, borderRadius: 2 }}>
@@ -59,7 +79,7 @@ export default function CalculatorPanel({
               value={num}
               text={num.toString()}
               onClick={() => onNumberClick(num)}
-              disabled={isNumberUsed(num)}
+              disabled={isNumberUsed(num) || isMaxInputsReached()}
               selected={isNumberUsed(num)}
             />
           </Grid>
@@ -72,7 +92,7 @@ export default function CalculatorPanel({
               value={num}
               text={num.toString()}
               onClick={() => onNumberClick(num)}
-              disabled={isNumberUsed(num)}
+              disabled={isNumberUsed(num) || isMaxInputsReached()}
               selected={isNumberUsed(num)}
             />
           </Grid>
@@ -85,7 +105,7 @@ export default function CalculatorPanel({
               value={num}
               text={num.toString()}
               onClick={() => onNumberClick(num)}
-              disabled={isNumberUsed(num)}
+              disabled={isNumberUsed(num) || isMaxInputsReached()}
               selected={isNumberUsed(num)}
             />
           </Grid>

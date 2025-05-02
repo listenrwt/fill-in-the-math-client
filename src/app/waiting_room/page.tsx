@@ -1,118 +1,107 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Box, Grid, Typography } from '@mui/material';
-import { Socket, io } from 'socket.io-client';
+
+import { RoomStatus } from '@/lib/game.types';
+import socketService from '@/services/socket.service';
 
 import GameEndResult, { GameResult } from '../components/waiting_room/game_end_result';
 import GameStartControls from '../components/waiting_room/game_start_controls';
 import PlayerList from '../components/waiting_room/player_list';
 import SettingsPanel from '../components/waiting_room/settings_panel';
+import { useGameEventsContext } from '../contexts/GameEventsContext';
 
 export default function WaitingRoomPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const socketRef = useRef<Socket | null>(null);
 
-  interface Player {
-    id: number;
-    username: string;
-    isHost: boolean;
-    avatarID?: number;
-  }
+  // Use GameEventsContext instead of direct socket communication
+  const {
+    currentRoom,
+    roomConfig,
+    leaderboard,
+    handleRoomConfigChange,
+    startGame,
+    leaveRoom,
+    updateRoomSettings,
+    continueGame,
+  } = useGameEventsContext();
 
-  const [roomId, setRoomId] = useState('123456');
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [isHost, setIsHost] = useState(true);
-
-  // Game room settings.
-  const [timeLimit, setTimeLimit] = useState(30);
-  const [difficulty, setDifficulty] = useState('medium');
-  const [maxPlayers, setMaxPlayers] = useState(4);
-  const [attackDamage, setAttackDamage] = useState(5);
-  const [healAmount, setHealAmount] = useState(3);
-  const [wrongAnswerPenalty, setWrongAnswerPenalty] = useState(3);
-
-  // New input parameter: gameStatus.
-  // If a gameStatus query parameter is provided, we use that; else default to 'Waiting...'
+  // Set initial game status based on query param or room status
   const initialGameStatus = searchParams.get('gameStatus') || 'Waiting...';
-
   const [gameStatus, setGameStatus] = useState(initialGameStatus);
-  const [isRoomPublic, setIsRoomPublic] = useState(false);
+
+  // Computed values from context
+  const isHost = currentRoom?.hostId === socketService.getSocket()?.id;
+  const roomId = currentRoom?.id || 'Loading...';
+
+  // Local state for UI control
   const [showGameEndResult, setShowGameEndResult] = useState(false);
 
+  // Update game status when room status changes
   useEffect(() => {
-    socketRef.current = io('http://localhost:3001');
-    socketRef.current.emit('joinRoom', { roomId });
-
-    socketRef.current.on('roomData', (data) => {
-      setRoomId(data.roomId);
-      setPlayers(data.players);
-      setIsHost(data.currentPlayer?.isHost);
-    });
-
-    // Listen for the gameEnded event. When received, update the status and redirect.
-    socketRef.current.on('gameEnded', () => {
-      setGameStatus('Ended');
-      router.push('/waiting_room');
-    });
-
-    return () => {
-      if (socketRef.current) socketRef.current.disconnect();
-    };
-  }, [roomId, router]);
-
-  useEffect(() => {
-    if (players.length === 0) {
-      const samplePlayers: Player[] = [
-        { id: 0, username: 'You', isHost: true, avatarID: 0 },
-        { id: 1, username: 'Player1', isHost: false, avatarID: 2 },
-        { id: 2, username: 'Player2', isHost: false, avatarID: 3 },
-        { id: 3, username: 'Player3', isHost: false, avatarID: 7 },
-      ];
-      setPlayers(samplePlayers);
+    if (!currentRoom) {
+      router.push('/lobby'); // Redirect to lobby if not in a room
+      return;
     }
-  }, [players]);
 
-  useEffect(() => {
-    setShowGameEndResult(gameStatus === 'Ended');
-  }, [gameStatus]);
+    switch (currentRoom.status) {
+      case RoomStatus.WAITING:
+        setGameStatus('Waiting...');
+        setShowGameEndResult(false);
+        break;
+      case RoomStatus.IN_PROGRESS:
+        setGameStatus('In Progress');
+        setShowGameEndResult(false);
+        // Redirect all players to the game page when the game starts
+        router.push('/game');
+        break;
+      case RoomStatus.FINISHED:
+        setGameStatus('Ended');
+        setShowGameEndResult(true);
+        break;
+      default:
+        setGameStatus('Unknown');
+    }
+  }, [currentRoom, router]);
 
-  const gameResults: GameResult[] = [
-    { rank: 1, username: 'Bruh (You)', avatarId: 0, score: 112 },
-    { rank: 2, username: 'Player1', avatarId: 2, score: 88 },
-    { rank: 3, username: 'Player2', avatarId: 3, score: 90 },
-    { rank: 4, username: 'Player3', avatarId: 7, score: 69 },
-  ];
-
+  // Handle start game - updates settings before starting the game
   const handleStart = () => {
-    if (!isHost) return;
-    socketRef.current?.emit('startGame', {
-      timeLimit,
-      difficulty,
-      maxPlayers,
-      attackDamage,
-      healAmount,
-      wrongAnswerPenalty,
-    });
-    setGameStatus('starting');
-    router.push('/game');
+    if (!isHost || (currentRoom && currentRoom?.players.length < 2)) return;
+    updateRoomSettings();
+    startGame();
+    // Navigation now happens in the useEffect based on room status change
   };
 
+  // Handle leave room
   const handleLeave = () => {
-    socketRef.current?.emit('leaveRoom', { roomId });
+    leaveRoom();
     router.push('/lobby');
   };
 
-  // Callback for switching back to the waiting room view.
+  // Callback for switching back to the waiting room view after game ends
   const handlePlayAgain = () => {
+    // First call continueGame to reset the room status in the server
+    if (isHost && currentRoom) {
+      continueGame();
+    }
+
+    // Then update the local UI state
     setShowGameEndResult(false);
     setGameStatus('Waiting...');
-    setShowGameEndResult(false);
   };
+
+  // Convert leaderboard to game results format
+  const gameResults: GameResult[] = leaderboard.map((entry) => ({
+    rank: entry.rank,
+    username: entry.username,
+    avatarId: currentRoom?.players.find((p) => p.id === entry.playerId)?.avatarID ?? 1,
+    score: entry.score,
+  }));
 
   return (
     <Grid
@@ -152,37 +141,74 @@ export default function WaitingRoomPage() {
               <Grid item>
                 <Grid container padding={2} maxWidth={300} borderRadius={2}>
                   <Grid container bgcolor="#D9D9D9" color="#000000" borderRadius={2}>
-                    <PlayerList players={players} maxPlayers={maxPlayers} />
-                  </Grid>
-                </Grid>
-              </Grid>
-              {/* Settings Panel */}
-              <Grid item>
-                <Grid container padding={2} minWidth={300} maxWidth={600} borderRadius={2}>
-                  <Grid container bgcolor="#D9D9D9" color="#000000" borderRadius={2}>
-                    <SettingsPanel
-                      timeLimit={timeLimit}
-                      difficulty={difficulty}
-                      maxPlayers={maxPlayers}
-                      attackDamage={attackDamage}
-                      healAmount={healAmount}
-                      wrongAnswerPenalty={wrongAnswerPenalty}
-                      disabled={!isHost}
-                      onTimeLimitChange={setTimeLimit}
-                      onDifficultyChange={setDifficulty}
-                      onMaxPlayersChange={setMaxPlayers}
-                      onAttackDamageChange={setAttackDamage}
-                      onHealAmountChange={setHealAmount}
-                      onWrongAnswerPenaltyChange={setWrongAnswerPenalty}
-                      isRoomPublic={isRoomPublic}
-                      onRoomPublicChange={(newVal) => {
-                        setIsRoomPublic(newVal);
-                        socketRef.current?.emit('setRoomPublic', { roomId, isPublic: newVal });
-                      }}
+                    <PlayerList
+                      players={
+                        currentRoom?.players.map((player) => ({
+                          id: Number(player.id),
+                          username: player.username,
+                          isHost: player.isHost,
+                          avatarID: player.avatarID,
+                        })) || []
+                      }
+                      maxPlayers={roomConfig.maxPlayers}
                     />
                   </Grid>
                 </Grid>
               </Grid>
+              {/* Settings Panel - Only visible to host */}
+              {isHost && (
+                <Grid item>
+                  <Grid container padding={2} minWidth={300} maxWidth={600} borderRadius={2}>
+                    <Grid container bgcolor="#D9D9D9" color="#000000" borderRadius={2}>
+                      <SettingsPanel
+                        timeLimit={roomConfig.timeLimit}
+                        difficulty={roomConfig.Difficulty}
+                        maxPlayers={roomConfig.maxPlayers}
+                        attackDamage={roomConfig.attackDamage}
+                        healAmount={roomConfig.healAmount}
+                        wrongAnswerPenalty={roomConfig.wrongAnswerPenalty}
+                        disabled={!isHost}
+                        onTimeLimitChange={(value) => {
+                          handleRoomConfigChange({
+                            target: { name: 'timeLimit', value },
+                          } as React.ChangeEvent<{ name: string; value: number }>);
+                        }}
+                        onDifficultyChange={(value) => {
+                          handleRoomConfigChange({
+                            target: { name: 'Difficulty', value },
+                          } as React.ChangeEvent<{ name: string; value: string }>);
+                        }}
+                        onMaxPlayersChange={(value) => {
+                          handleRoomConfigChange({
+                            target: { name: 'maxPlayers', value },
+                          } as React.ChangeEvent<{ name: string; value: number }>);
+                        }}
+                        onAttackDamageChange={(value) => {
+                          handleRoomConfigChange({
+                            target: { name: 'attackDamage', value },
+                          } as React.ChangeEvent<{ name: string; value: number }>);
+                        }}
+                        onHealAmountChange={(value) => {
+                          handleRoomConfigChange({
+                            target: { name: 'healAmount', value },
+                          } as React.ChangeEvent<{ name: string; value: number }>);
+                        }}
+                        onWrongAnswerPenaltyChange={(value) => {
+                          handleRoomConfigChange({
+                            target: { name: 'wrongAnswerPenalty', value },
+                          } as React.ChangeEvent<{ name: string; value: number }>);
+                        }}
+                        isRoomPublic={roomConfig.isPublic}
+                        onRoomPublicChange={(value) => {
+                          handleRoomConfigChange({
+                            target: { name: 'isPublic', value },
+                          } as React.ChangeEvent<{ name: string; value: boolean }>);
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+              )}
             </Grid>
           )}
         </Grid>

@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Box, ThemeProvider } from '@mui/material';
 
 import Logo from './components/logo';
+import { GameEventsProvider } from './contexts/GameEventsContext';
 import './globals.css';
 import theme from './theme';
 
@@ -22,18 +23,20 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ThemeProvider theme={theme}>
-          <Logo />
-          {/* Main content with top padding to avoid logo overlap */}
-          <Box
-            sx={{
-              paddingLeft: 0,
-              paddingRight: 0,
-              margin: 0,
-              overflowX: 'hidden', // prevent scrollbar caused by logo
-            }}
-          >
-            {children}
-          </Box>
+          <GameEventsProvider>
+            <Logo />
+            {/* Main content with top padding to avoid logo overlap */}
+            <Box
+              sx={{
+                paddingLeft: 0,
+                paddingRight: 0,
+                margin: 0,
+                overflowX: 'hidden', // prevent scrollbar caused by logo
+              }}
+            >
+              {children}
+            </Box>
+          </GameEventsProvider>
         </ThemeProvider>
       </body>
     </html>

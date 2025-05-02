@@ -25,7 +25,7 @@ export default function LoginForm({ setNotification }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const { login, loading } = useSystemEvents();
+  const { login, getUserData, loading } = useSystemEvents();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,13 +46,20 @@ export default function LoginForm({ setNotification }: LoginFormProps) {
     if (result.success) {
       setNotification({
         open: true,
-        message: 'Login successful! Redirecting to lobby...',
+        message: 'Login successful! Fetching your data...',
         severity: 'success',
       });
 
-      // Store user info in localStorage or session for auth state
+      // Store user info in localStorage for auth state
       if (result.user) {
         localStorage.setItem('user', JSON.stringify(result.user));
+      }
+
+      // Fetch latest user data from the server
+      const userDataResult = await getUserData();
+
+      if (!userDataResult.success) {
+        console.error('Failed to fetch complete user data:', userDataResult.message);
       }
 
       // Redirect to lobby after successful login

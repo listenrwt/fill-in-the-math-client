@@ -1,4 +1,6 @@
-import { Divider, SxProps } from '@mui/material';
+'use client';
+
+import { Box, Divider, SxProps } from '@mui/material';
 
 interface GameContainerProps {
   sx?: SxProps;
@@ -15,6 +17,20 @@ export default function GameContainer({ sx }: GameContainerProps) {
         alignContent: 'center',
         margin: '0 auto',
         ...sx, // override or add to default styles
+      }}
+    />
+  );
+}
+
+export function Stroke() {
+  return (
+    <Box
+      sx={{
+        height: '1px',
+        width: '100%',
+        backgroundColor: '#000000',
+        opacity: 0.2,
+        my: 1,
       }}
     />
   );
