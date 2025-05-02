@@ -1,4 +1,3 @@
-// You can add more props to the component if needed.
 import CheckIcon from '@mui/icons-material/Check';
 import { Button } from '@mui/material';
 
@@ -7,40 +6,51 @@ interface CalculatorButtonProps {
   text: string;
   onClick?: () => void;
   disabled?: boolean;
-  variant?: 'number' | 'delete' | 'back' | 'confirm';
+  selected?: boolean;
+  variant?: 'number' | 'delete' | 'clear' | 'confirm';
 }
 
 export default function CalculatorButton({
-  // value,
   text,
   onClick,
   disabled,
+  selected = false,
   variant = 'number',
 }: CalculatorButtonProps) {
-  // Define styles based on button variant
   const getButtonStyle = () => {
+    let style = {};
+
     switch (variant) {
       case 'delete':
-        return { bgcolor: 'red', color: 'white' };
-      case 'back':
-        return { bgcolor: '#262626', color: 'white' };
+        style = { bgcolor: '#555555', color: '#FFFFFF' };
+        break;
+      case 'clear':
+        style = { bgcolor: '#FF0000', color: '#FFFFFF' };
+        break;
       case 'confirm':
-        return { bgcolor: 'green', color: 'white' };
+        style = { bgcolor: '#009900', color: '#FFFFFF' };
+        break;
       default:
-        return { bgcolor: '#5E5E5E', color: 'white' };
+        style = { bgcolor: '#919191', color: '#FFFFFF' };
     }
+
+    if (selected) {
+      style = { ...style, bgcolor: '#6C6C6C' };
+    }
+
+    return style;
   };
 
   return (
     <Button
-      variant="contained"
+      variant="text"
       sx={{
         width: 60,
         height: 60,
         fontSize: '1.5rem',
         borderRadius: 2,
         ...getButtonStyle(),
-        '&:hover': { opacity: 0.8 },
+        '&:hover': { opacity: disabled ? 1 : 0.8 },
       }}
       onClick={onClick}
       disabled={disabled}

@@ -5,9 +5,9 @@ import { Grid2 } from '@mui/material';
 import { MathSymbol } from '@/lib/question.enum';
 import { Equation } from '@/lib/question.types';
 
-import CalculatorDisplay from './ui/calculator_display';
-import CalculatorPanel from './ui/calculator_panel';
-import GameAction from './ui/game_action';
+import GameAction from './ui/action/game_action';
+import CalculatorDisplay from './ui/calculator/calculator_display';
+import CalculatorPanel from './ui/calculator/calculator_panel';
 import InGameTimer from './ui/in_game_timer';
 
 // TODO: Implement the GameContainer component, create more components if needed
@@ -47,7 +47,7 @@ export default function GameContainer() {
   };
 
   // Function to clear all blank inputs and reset them to "?"
-  const handleDelete = () => {
+  const handleClear = () => {
     setQuestion(initialQuestion);
     setFilledIndexes([]); // Reset tracked indexes
   };
@@ -113,7 +113,7 @@ Once correct, replace it with the game action window. */}
               <CalculatorDisplay question={question} />
               <CalculatorPanel
                 onNumberClick={handleNumberClick}
-                onDelete={handleDelete}
+                onClear={handleClear}
                 onDeleteLast={handleBackspace}
                 onSubmit={handleSubmit} // Here the confirm button will trigger handleSubmit
               />
