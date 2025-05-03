@@ -1,12 +1,90 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-import { Box, Button, Grid, Typography } from '@mui/material';
+import { Alert, Box, Button, Grid, Snackbar, Typography } from '@mui/material';
 
-const Lobby = () => {
+import { useGameEventsContext } from './contexts/GameEventsContext';
+import useSystemEvents from './hooks/useSystemEvents';
+
+const HomePage = () => {
+  const router = useRouter();
+  const { connectToServer, setUsername } = useGameEventsContext();
+  const { logout } = useSystemEvents();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [notification, setNotification] = useState({
+    open: false,
+    message: '',
+    severity: 'success' as 'success' | 'error',
+  });
+
+  useEffect(() => {
+    // Check if user is logged in on page load
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        setIsLoggedIn(true);
+        // Set username in context if user is logged in
+        if (userData.username || userData.name) {
+          setUsername(userData.username || userData.name);
+        }
+      } catch (error) {
+        console.error('Error parsing user data from localStorage:', error);
+      }
+    }
+  }, [setUsername]);
+
+  const handlePlayAsGuest = async () => {
+    // Generate a random 5-digit number for the guest username
+    const randomNumber = Math.floor(100 + Math.random() * 900);
+    const guestUsername = `guest_${randomNumber}`;
+
+    // Set the guest username in context
+    setUsername(guestUsername);
+
+    // Store guest flag and username in localStorage
+    localStorage.setItem('isGuest', 'true');
+    localStorage.setItem('guestUsername', guestUsername);
+
+    // Connect to the server before redirecting to lobby
+    await connectToServer();
+    router.push('/lobby');
+  };
+
+  const handleContinueToLobby = async () => {
+    // Connect to the server before redirecting to lobby
+    await connectToServer();
+    router.push('/lobby');
+  };
+
+  const handleLogout = async () => {
+    // Call logout function from useSystemEvents
+    const result = await logout();
+
+    // Clear guest flags if they exist
+    localStorage.removeItem('isGuest');
+    localStorage.removeItem('guestUsername');
+
+    // Display notification based on result
+    setNotification({
+      open: true,
+      message: result.success ? 'Logged out successfully' : result.message,
+      severity: result.success ? 'success' : 'error',
+    });
+
+    // Update login state
+    if (result.success) {
+      setIsLoggedIn(false);
+    }
+  };
+
+  const handleCloseNotification = () => {
+    setNotification({ ...notification, open: false });
+  };
+
   return (
     <Box
       sx={{
@@ -16,7 +94,7 @@ const Lobby = () => {
         padding: 2,
       }}
     >
-      {/* Top bar with logo (left) and course title (right) */}
+      {/* Top bar with course title (right) */}
       <Box
         sx={{
           display: 'flex',
@@ -63,44 +141,82 @@ const Lobby = () => {
               color: '#000000',
             }}
           >
-            please select
+            {isLoggedIn ? 'welcome back' : 'please select'}
           </Typography>
           <Grid container justifyContent="center">
-            <Box>
-              <Link href="/lobby" passHref>
-                <Button
-                  variant="contained"
-                  sx={{
-                    fontSize: { xs: '1rem', md: '1.2rem' },
-                    borderRadius: '0 0 0 8px',
-                    backgroundColor: '#919191',
-                    '&:hover': { backgroundColor: '#7a7a7a' },
-                    width: { xs: '200px', md: '300px' },
-                    height: { xs: '60px', md: '72px' },
-                  }}
-                >
-                  Play&nbsp;as&nbsp;Guest
-                </Button>
-              </Link>
-            </Box>
-            <Box>
-              <Link href="/login" passHref>
-                <Button
-                  variant="contained"
-                  fullWidth
-                  sx={{
-                    fontSize: { xs: '1rem', md: '1.2rem' },
-                    borderRadius: '0 0 8px 0',
-                    backgroundColor: '#919191',
-                    '&:hover': { backgroundColor: '#7a7a7a' },
-                    width: { xs: '200px', md: '300px' },
-                    height: { xs: '60px', md: '72px' },
-                  }}
-                >
-                  Login/Register
-                </Button>
-              </Link>
-            </Box>
+            {isLoggedIn ? (
+              <>
+                <Box>
+                  <Button
+                    onClick={handleContinueToLobby}
+                    variant="contained"
+                    sx={{
+                      fontSize: { xs: '1rem', md: '1.2rem' },
+                      borderRadius: '0 0 0 8px',
+                      backgroundColor: '#919191',
+                      '&:hover': { backgroundColor: '#7a7a7a' },
+                      width: { xs: '200px', md: '300px' },
+                      height: { xs: '60px', md: '72px' },
+                    }}
+                  >
+                    Lobby
+                  </Button>
+                </Box>
+                <Box>
+                  <Button
+                    onClick={handleLogout}
+                    variant="contained"
+                    fullWidth
+                    sx={{
+                      fontSize: { xs: '1rem', md: '1.2rem' },
+                      borderRadius: '0 0 8px 0',
+                      backgroundColor: '#919191',
+                      '&:hover': { backgroundColor: '#7a7a7a' },
+                      width: { xs: '200px', md: '300px' },
+                      height: { xs: '60px', md: '72px' },
+                    }}
+                  >
+                    Logout
+                  </Button>
+                </Box>
+              </>
+            ) : (
+              <>
+                <Box>
+                  <Button
+                    onClick={handlePlayAsGuest}
+                    variant="contained"
+                    sx={{
+                      fontSize: { xs: '1rem', md: '1.2rem' },
+                      borderRadius: '0 0 0 8px',
+                      backgroundColor: '#919191',
+                      '&:hover': { backgroundColor: '#7a7a7a' },
+                      width: { xs: '200px', md: '300px' },
+                      height: { xs: '60px', md: '72px' },
+                    }}
+                  >
+                    Play&nbsp;as&nbsp;Guest
+                  </Button>
+                </Box>
+                <Box>
+                  <Button
+                    onClick={() => router.push('/login')}
+                    variant="contained"
+                    fullWidth
+                    sx={{
+                      fontSize: { xs: '1rem', md: '1.2rem' },
+                      borderRadius: '0 0 8px 0',
+                      backgroundColor: '#919191',
+                      '&:hover': { backgroundColor: '#7a7a7a' },
+                      width: { xs: '200px', md: '300px' },
+                      height: { xs: '60px', md: '72px' },
+                    }}
+                  >
+                    Login/Register
+                  </Button>
+                </Box>
+              </>
+            )}
           </Grid>
         </Box>
         {/* Title */}
@@ -119,8 +235,24 @@ const Lobby = () => {
           1155192782&nbsp;Chan&nbsp;Jackson&nbsp;|
         </Typography>
       </Box>
+
+      {/* Notification for logout results */}
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={6000}
+        onClose={handleCloseNotification}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseNotification}
+          severity={notification.severity}
+          sx={{ width: '100%' }}
+        >
+          {notification.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
 
-export default Lobby;
+export default HomePage;

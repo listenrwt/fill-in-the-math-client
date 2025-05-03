@@ -29,6 +29,7 @@ export interface Room {
 // Player related interfaces
 export interface Player {
   id: string;
+  avatarID: number;
   username: string;
   health: number;
   score: number;

@@ -9,16 +9,18 @@ export interface RegistrationData {
   password: string;
 }
 
+export interface UserData {
+  user_id: number;
+  username: string;
+  email: string;
+  date_registered: string;
+  profile_picture: number | null;
+  user_type: string;
+  experience: number;
+}
+
 export interface AuthResponse {
   success: boolean;
   message: string;
-  user?: {
-    user_id: number;
-    username: string;
-    email: string;
-    date_registered: string;
-    profile_picture: number | null;
-    user_type: string;
-    experience: number;
-  };
+  user?: UserData;
 }

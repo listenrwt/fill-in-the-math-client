@@ -1,126 +1,92 @@
-import { useState } from 'react';
+import { Box, Typography } from '@mui/material';
 
-import { Grid2 } from '@mui/material';
-
-import { MathSymbol } from '@/lib/question.enum';
-import { Equation } from '@/lib/question.types';
+import { Question } from '@/lib/game.types';
 
 import GameAction from './ui/action/game_action';
 import CalculatorDisplay from './ui/calculator/calculator_display';
 import CalculatorPanel from './ui/calculator/calculator_panel';
-import InGameTimer from './ui/in_game_timer';
+import { Stroke } from './ui/stroke';
 
-// TODO: Implement the GameContainer component, create more components if needed
-export default function GameContainer() {
-  // Initial question with multiple blanks
-  const initialQuestion: Equation = [
-    MathSymbol.Blank, // First blank
-    MathSymbol.Addition,
-    2,
-    MathSymbol.Multiplication,
-    MathSymbol.Blank, // Second blank
-    MathSymbol.Equals,
-    MathSymbol.Blank, // Third blank
-  ];
+interface GameContainerProps {
+  currentQuestion: Question | null;
+  answer: number[];
+  setAnswer: (answer: number[]) => void;
+  submitAnswer: () => void;
+  performHeal: () => void;
+  performAttack: (targetId: string) => void;
+  canPerformAction: boolean;
+  health: number;
+}
 
-  // State to store the question
-  const [question, setQuestion] = useState<Equation>(initialQuestion);
-  const [filledIndexes, setFilledIndexes] = useState<number[]>([]);
-  const [showGameAction, setShowGameAction] = useState(false);
+export default function GameContainer({
+  currentQuestion,
+  answer,
+  setAnswer,
+  submitAnswer,
+  performHeal,
+  performAttack,
+  canPerformAction,
+}: GameContainerProps) {
+  // Show game action UI when the user can perform an action (answered correctly)
+  // or show the calculator UI when they need to answer a question
 
-  // Function to replace only the first available blank
   const handleNumberClick = (num: number) => {
-    setQuestion((prevQuestion) => {
-      const firstBlankIndex = prevQuestion.indexOf(MathSymbol.Blank);
-      if (firstBlankIndex === -1) return prevQuestion; // No blanks left
+    // Check if this number is already used
+    if (answer.includes(num)) return;
 
-      // Replace only the first blank
-      const newQuestion = prevQuestion.map((item, index) =>
-        index === firstBlankIndex ? num : item
-      );
-
-      // Track the filled blank position
-      setFilledIndexes((prevIndexes) => [...prevIndexes, firstBlankIndex]);
-
-      return newQuestion;
-    });
+    // Add the number to the answer array
+    setAnswer([...answer, num]);
   };
 
-  // Function to clear all blank inputs and reset them to "?"
   const handleClear = () => {
-    setQuestion(initialQuestion);
-    setFilledIndexes([]); // Reset tracked indexes
+    setAnswer([]);
   };
 
-  // Function to remove only the last entered number
   const handleBackspace = () => {
-    if (filledIndexes.length === 0) return; // No numbers entered
-
-    setQuestion((prevQuestion) => {
-      // Get the last filled blank position
-      const lastFilledIndex = filledIndexes[filledIndexes.length - 1];
-
-      // Reset only the last filled blank to "?"
-      const newQuestion = [...prevQuestion];
-      newQuestion[lastFilledIndex] = MathSymbol.Blank;
-
-      // Remove last filled index from tracking
-      setFilledIndexes((prevIndexes) => prevIndexes.slice(0, -1));
-
-      return newQuestion;
-    });
-  };
-
-  // Example function to check if the answer is correct
-  // For this temporary function, we assume that if there are
-  // no blank symbols left in the question, the answer is correct.
-  const handleSubmit = () => {
-    console.log('Answer submitted');
-    if (!question.includes(MathSymbol.Blank)) {
-      console.log('Answer is correct. Switching to game actions...');
-      setShowGameAction(true);
-    } else {
-      console.log('Answer is incorrect. Please complete your answer.');
-    }
+    if (answer.length === 0) return;
+    setAnswer(answer.slice(0, -1));
   };
 
   return (
-    <Grid2 container direction="column" justifyContent="center" spacing={2}>
-      <Grid2 container direction="row" justifyContent="center" alignItems="center">
-        <InGameTimer />
-      </Grid2>
-      <Grid2 container direction="column" justifyContent="center" alignItems="center" spacing={2}>
-        <Grid2>
-          {/* Conditionally render: before answer is correct, show the calculator panel.
-Once correct, replace it with the game action window. */}
-          {showGameAction ? (
-            <GameAction
-              onActionComplete={() => {
-                // Optionally prepare and load the next question.
-                setQuestion(initialQuestion); // Or load your actual next question.
-                setFilledIndexes([]);
-                setShowGameAction(false);
-              }}
-            />
-          ) : (
-            <Grid2
-              container
-              direction="column"
-              justifyContent="center"
-              alignItems="center"
-              spacing={2}
-            >
-              <CalculatorDisplay question={question} />
-              <CalculatorPanel
-                onNumberClick={handleNumberClick}
-                onClear={handleClear}
-                onDeleteLast={handleBackspace}
-                onSubmit={handleSubmit} // Here the confirm button will trigger handleSubmit
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '50vh',
+      }}
+    >
+      <Box sx={{ borderRadius: 2, bgcolor: '#D9D9D9', width: '100%', maxWidth: 1000 }}>
+        {canPerformAction ? (
+          <GameAction
+            onActionComplete={() => {}} // This is handled by the context now
+            performAttack={performAttack}
+            performHeal={performHeal}
+          />
+        ) : (
+          <>
+            {currentQuestion && (
+              <CalculatorDisplay
+                equation={currentQuestion.equation_arr}
+                answer={answer} // Pass the answer array to display selected numbers
               />
-            </Grid2>
-          )}
-        </Grid2>
-      </Grid2>
-    </Grid2>
+            )}
+            <Stroke />
+            <CalculatorPanel
+              onNumberClick={handleNumberClick}
+              onClear={handleClear}
+              onDeleteLast={handleBackspace}
+              onSubmit={submitAnswer}
+              usedNumbers={answer}
+              equation={currentQuestion?.equation_arr || []} // Pass equation to limit inputs based on blanks
+            />
+          </>
+        )}
+      </Box>
+      <Typography variant="caption" sx={{ mt: 4 }}>
+        Brought to you by: Group B8
+      </Typography>
+    </Box>
   );
 }

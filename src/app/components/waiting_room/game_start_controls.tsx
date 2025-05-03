@@ -71,7 +71,7 @@ const GameStartControls: React.FC<GameStartControlsProps> = ({
       </Grid>
 
       {/* Bottom-Right Button: Show Lobby button */}
-      {onPlayAgain && (
+      {isHost && onPlayAgain && (
         <Box sx={{ position: 'absolute', right: 0, bottom: 0 }}>
           <Button
             variant="outlined"

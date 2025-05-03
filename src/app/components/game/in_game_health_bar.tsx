@@ -1,68 +1,23 @@
-// File: CompactLeaderboard.tsx
-import React, { useEffect, useState } from 'react';
+'use client';
 
 import { Box, LinearProgress, Stack, Typography } from '@mui/material';
-import io, { Socket } from 'socket.io-client';
+
+import { useGameEventsContext } from '@/app/contexts/GameEventsContext';
 
 import UserAvatar from '../UserAvatar';
 
-// Define Player interface
-interface Player {
-  id: number;
-  username: string;
-  avatarId: number;
-  hp: number; // HP represented as seconds left
-  maxHp: number; // Maximum HP value
-}
+const InGameLeaderboard = () => {
+  const { currentRoom } = useGameEventsContext();
 
-const CompactLeaderboard = () => {
-  // State to store player data
-  const [players, setPlayers] = useState<Player[]>([]);
-  // Connect to the backend server
-  const socket: Socket = io('http://localhost:3001');
-
-  useEffect(() => {
-    // Connect to game server
-    socket.on('connect', () => {
-      console.log('Connected to game server');
-      // Request initial player data
-      socket.emit('getPlayerStats');
-    });
-
-    // Listen for player stats updates
-    socket.on('playerStats', (data: Player[]) => {
-      console.log('Received player stats:', data);
-      setPlayers(data);
-    });
-
-    // Listen for individual player updates
-    socket.on('playerUpdate', (updatedPlayer: Player) => {
-      setPlayers((prevPlayers) =>
-        prevPlayers.map((player) => (player.id === updatedPlayer.id ? updatedPlayer : player))
-      );
-    });
-
-    // Cleanup
-    return () => {
-      socket.off('connect');
-      socket.off('playerStats');
-      socket.off('playerUpdate');
-      socket.disconnect();
-    };
-  }, [socket]);
-
-  // For testing purposes, temporary data set
-  useEffect(() => {
-    if (players.length === 0) {
-      const samplePlayers: Player[] = [
-        { id: 0, username: 'You', hp: 999, maxHp: 1000, avatarId: 2 },
-        { id: 1, username: 'Player1', hp: 18, maxHp: 30, avatarId: 3 },
-        { id: 2, username: 'Player2', hp: 22, maxHp: 30, avatarId: 5 },
-        { id: 3, username: 'Player3', hp: 8, maxHp: 30, avatarId: 0 },
-      ];
-      setPlayers(samplePlayers);
-    }
-  }, [players]);
+  // Current players from the context - ensure non-null values
+  const players =
+    currentRoom?.players.map((player) => ({
+      id: player.id,
+      username: player.username,
+      avatarId: player.avatarID ?? 1,
+      hp: player.health ?? 0,
+      maxHp: currentRoom.config.timeLimit ?? 30,
+    })) || [];
 
   // Function to determine the color of the HP bar based on remaining HP percentage
   const getHpColor = (hp: number, maxHp: number): string => {
@@ -100,7 +55,7 @@ const CompactLeaderboard = () => {
               {player.username}&nbsp;
             </Typography>
             <UserAvatar
-              avatarId={player.avatarId ?? 1}
+              avatarId={player.avatarId}
               alt={player.username}
               sx={{ width: { xs: 20, md: 24 }, height: { xs: 20, md: 24 } }}
             />
@@ -134,4 +89,4 @@ const CompactLeaderboard = () => {
   );
 };
 
-export default CompactLeaderboard;
+export default InGameLeaderboard;
