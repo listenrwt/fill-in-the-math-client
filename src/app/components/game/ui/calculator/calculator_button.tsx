@@ -1,3 +1,4 @@
+import { keyframes } from '@emotion/react';
 import CheckIcon from '@mui/icons-material/Check';
 import { Button } from '@mui/material';
 
@@ -9,6 +10,15 @@ interface CalculatorButtonProps {
   selected?: boolean;
   variant?: 'number' | 'delete' | 'clear' | 'confirm';
 }
+
+// Define a rotational shake keyframes animation
+const rotateShake = keyframes`
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+  75% { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
+`;
 
 export default function CalculatorButton({
   text,
@@ -50,7 +60,7 @@ export default function CalculatorButton({
         fontSize: '1.5rem',
         borderRadius: 2,
         ...getButtonStyle(),
-        '&:hover': { opacity: disabled ? 1 : 0.8 },
+        '&:hover': { opacity: disabled ? 1 : 0.8, animation: `${rotateShake} 0.4s ease` },
       }}
       onClick={onClick}
       disabled={disabled}
