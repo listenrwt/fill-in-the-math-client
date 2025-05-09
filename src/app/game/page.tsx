@@ -65,6 +65,9 @@ export default function Page() {
   // Timer duration based on room config or default to 30 seconds
   const timerDuration = currentRoom?.config?.timeLimit ?? 30;
 
+  // Global timer state for emergency UI effects (for GameContainer and Stroke emergency glows)
+  const [globalTimeLeft, setGlobalTimeLeft] = useState(timerDuration);
+
   // Style for the flash effect
   const backgroundStyle = {
     position: 'fixed' as const,
@@ -86,8 +89,9 @@ export default function Page() {
       <Grid2 p={2}>
         <InGameLeaderboard />
         <InGameTimer
-          duration={timerDuration}
           onTimerComplete={() => router.push('/waiting_room')}
+          // Pass callback so that InGameTimer updates globalTimeLeft
+          onTimeChange={setGlobalTimeLeft}
         />
         {currentRoom?.status === RoomStatus.IN_PROGRESS && (
           <GameContainer
@@ -99,6 +103,8 @@ export default function Page() {
             performAttack={performAttack}
             canPerformAction={canPerformAction}
             health={health}
+            // Pass globalTimeLeft for emergency glow effects inside GameContainer
+            timeLeft={globalTimeLeft}
           />
         )}
       </Grid2>

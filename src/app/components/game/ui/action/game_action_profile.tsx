@@ -30,6 +30,21 @@ const GameActionProfile: React.FC<GameActionProfileProps> = ({ player, action, o
         // Use a conditional background color. You can adjust these colors as needed.
         backgroundColor: '#919191',
         color: '#FFFFFF',
+        // hover effects: enlarge with more shadow & colour change
+        boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        '&:hover': {
+          transform: 'scale(1.05)',
+          color: '#000000',
+          boxShadow:
+            action === 'heal'
+              ? '0 6px 25px rgba(0, 255, 0, 0.4)' // greenish glow
+              : '0 6px 25px rgba(255, 50, 50, 0.4)', // reddish glow
+          backgroundColor:
+            action === 'heal'
+              ? 'rgba(0, 255, 0, 0.1)' // subtle green tint
+              : 'rgba(255, 50, 50, 0.1)', // subtle red tint
+        },
       }}
     >
       {/* Container for the avatar and overlay image */}
