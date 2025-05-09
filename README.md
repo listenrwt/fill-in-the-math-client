@@ -1,7 +1,7 @@
 ## Fill in the Math
 Welcome to Fill in the math, an online arithmetic battle royale created by Group B8 for CSCI3100!
 
-## Hosting
+## Quick Start
 1. Clone Repository  
 ```bash
 git clone https://github.com/listenrwt/fill-in-the-math-client.git
@@ -31,7 +31,7 @@ yarn dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-Remember to run both the server and the client simultaneously for it to work.
+Remember to run both the server and the client simultaneously for it to work. Link to server git repository: https://github.com/listenrwt/fill-in-the-math-server
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
