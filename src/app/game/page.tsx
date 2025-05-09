@@ -89,7 +89,6 @@ export default function Page() {
       <Grid2 p={2}>
         <InGameLeaderboard />
         <InGameTimer
-          duration={timerDuration}
           onTimerComplete={() => router.push('/waiting_room')}
           // Pass callback so that InGameTimer updates globalTimeLeft
           onTimeChange={setGlobalTimeLeft}
