@@ -62,9 +62,9 @@ export default function LoginForm({ setNotification }: LoginFormProps) {
         console.error('Failed to fetch complete user data:', userDataResult.message);
       }
 
-      // Redirect to lobby after successful login
+      // Redirect to home page after successful login
       setTimeout(() => {
-        router.push('/lobby');
+        router.push('/');
       }, 1000);
     } else {
       setNotification({

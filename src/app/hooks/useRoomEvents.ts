@@ -24,6 +24,7 @@ export const useRoomEvents = (isConnected: boolean) => {
   const [roomConfig, setRoomConfig] = useState<RoomConfig>(DEFAULT_CONFIG);
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
   const [gameMessage, setGameMessage] = useState('');
+  const [avatarId, setAvatarId] = useState(1); // Default avatar ID
 
   const handleRoomConfigChange = (
     e: ChangeEvent<HTMLInputElement | { name: string; value: unknown }>
@@ -99,6 +100,7 @@ export const useRoomEvents = (isConnected: boolean) => {
     socketService.emit(RoomEvents.CREATE_ROOM, {
       username,
       roomName,
+      avatarId,
       config: roomConfig,
     });
   };
@@ -109,6 +111,7 @@ export const useRoomEvents = (isConnected: boolean) => {
     socketService.emit(RoomEvents.JOIN_ROOM, {
       username,
       roomId: roomIdToJoin,
+      avatarId,
     });
   };
 
@@ -117,6 +120,7 @@ export const useRoomEvents = (isConnected: boolean) => {
 
     socketService.emit(RoomEvents.QUICK_JOIN, {
       username,
+      avatarId,
     });
   };
 
@@ -166,6 +170,8 @@ export const useRoomEvents = (isConnected: boolean) => {
     gameMessage,
     setCurrentRoom,
     setGameMessage,
+    avatarId,
+    setAvatarId,
     createRoom,
     joinRoom,
     quickJoin,

@@ -4,15 +4,30 @@ import React, { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { Alert, Box, Button, Grid, Snackbar, Typography } from '@mui/material';
+import { Alert, Box, CircularProgress, Snackbar, Typography } from '@mui/material';
 
+import GameJoinCenterBox from './components/lobby/GameJoinCenterBox';
+import UserProfile from './components/lobby/UserProfile';
 import { useGameEventsContext } from './contexts/GameEventsContext';
 import useSystemEvents from './hooks/useSystemEvents';
 
 const HomePage = () => {
   const router = useRouter();
-  const { connectToServer, setUsername } = useGameEventsContext();
-  const { logout } = useSystemEvents();
+  const {
+    username,
+    avatarId,
+    isConnected,
+    connectToServer,
+    setUsername,
+    currentRoom,
+    setAvatarId,
+  } = useGameEventsContext();
+  const { getUserData, logout } = useSystemEvents();
+  // Use stable initial values for server-side rendering
+  const [isClientSide, setIsClientSide] = useState(false);
+  const [roomCode, setRoomCode] = useState('');
+  const [experience, setExperience] = useState(0);
+  const [isGuest, setIsGuest] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [notification, setNotification] = useState({
     open: false,
@@ -20,53 +35,125 @@ const HomePage = () => {
     severity: 'success' as 'success' | 'error',
   });
 
+  // Mark when client-side code is running and handle initialization
   useEffect(() => {
-    // Check if user is logged in on page load
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    setIsClientSide(true);
+
+    const fetchUserData = async () => {
       try {
-        const userData = JSON.parse(storedUser);
-        setIsLoggedIn(true);
-        // Set username in context if user is logged in
-        if (userData.username || userData.name) {
-          setUsername(userData.username || userData.name);
+        // Check if user is in guest mode
+        const guestFlag = localStorage.getItem('isGuest');
+
+        if (guestFlag === 'true') {
+          // User is in guest mode - always generate a new random guest username and avatar
+          setIsGuest(true);
+          setIsLoggedIn(false);
+
+          // Generate random avatar ID only on client side
+          const randomAvatarId = Math.floor(Math.random() * 6) + 1;
+          setAvatarId(randomAvatarId);
+
+          // Always generate a new random guest username
+          const randomNumber = Math.floor(100 + Math.random() * 900);
+          const newGuestUsername = `guest_${randomNumber}`;
+          setUsername(newGuestUsername);
+          return;
+        }
+
+        // Not in guest mode, attempt to fetch user data from the server
+        const userDataResult = await getUserData();
+
+        if (userDataResult.success && userDataResult.user) {
+          // Use the fresh data from the server
+          setUsername(userDataResult.user.username);
+          setAvatarId(userDataResult.user.profile_picture || 1);
+          setExperience(userDataResult.user.experience);
+          setIsLoggedIn(true);
+          setIsGuest(false);
+          return;
+        }
+
+        // Fallback to localStorage if server request fails
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          try {
+            const userData = JSON.parse(storedUser);
+            setUsername(userData.username || userData.name || '');
+            setAvatarId(userData.profile_picture || 1);
+            setExperience(userData.experience || 0);
+            setIsLoggedIn(true);
+            setIsGuest(false);
+          } catch (error) {
+            console.error('Error parsing user data from localStorage:', error);
+            // Set as guest since we couldn't get user data
+            handlePlayAsGuest();
+          }
+        } else {
+          // No user data found, set as guest
+          handlePlayAsGuest();
         }
       } catch (error) {
-        console.error('Error parsing user data from localStorage:', error);
+        console.error('Error loading user data:', error);
+        // Set default guest if anything fails
+        handlePlayAsGuest();
       }
+    };
+
+    // Ensure connection to server when on client-side
+    if (!isConnected) {
+      connectToServer();
     }
-  }, [setUsername]);
+
+    fetchUserData();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Redirect to waiting room if we're already in a room
+  useEffect(() => {
+    if (isClientSide && currentRoom) {
+      router.push('/waiting_room');
+    }
+  }, [currentRoom, router, isClientSide]);
 
   const handlePlayAsGuest = async () => {
-    // Generate a random 5-digit number for the guest username
+    // Only run this if we're on client side
+    if (!isClientSide) return;
+
+    // Generate a random 3-digit number for the guest username
     const randomNumber = Math.floor(100 + Math.random() * 900);
     const guestUsername = `guest_${randomNumber}`;
 
+    // Generate a random avatar ID for guest
+    const randomAvatarId = Math.floor(Math.random() * 6) + 1;
+    setAvatarId(randomAvatarId);
+
     // Set the guest username in context
     setUsername(guestUsername);
+    setIsGuest(true);
+    setIsLoggedIn(false);
 
-    // Store guest flag and username in localStorage
-    localStorage.setItem('isGuest', 'true');
-    localStorage.setItem('guestUsername', guestUsername);
+    // Store only the guest flag in localStorage (not the username)
+    try {
+      localStorage.setItem('isGuest', 'true');
+      // We no longer store guestUsername in localStorage
+    } catch (error) {
+      console.error('Error storing guest data:', error);
+    }
 
-    // Connect to the server before redirecting to lobby
+    // Make sure we're connected to the server
     await connectToServer();
-    router.push('/lobby');
-  };
-
-  const handleContinueToLobby = async () => {
-    // Connect to the server before redirecting to lobby
-    await connectToServer();
-    router.push('/lobby');
   };
 
   const handleLogout = async () => {
     // Call logout function from useSystemEvents
     const result = await logout();
 
-    // Clear guest flags if they exist
-    localStorage.removeItem('isGuest');
-    localStorage.removeItem('guestUsername');
+    // Clear guest flags if they exist (safely)
+    try {
+      localStorage.removeItem('isGuest');
+      // No need to remove guestUsername since we're not storing it anymore
+    } catch (error) {
+      console.error('Error removing localStorage items:', error);
+    }
 
     // Display notification based on result
     setNotification({
@@ -78,6 +165,8 @@ const HomePage = () => {
     // Update login state
     if (result.success) {
       setIsLoggedIn(false);
+      // Generate a new guest username
+      handlePlayAsGuest();
     }
   };
 
@@ -85,148 +174,47 @@ const HomePage = () => {
     setNotification({ ...notification, open: false });
   };
 
-  return (
-    <Box
-      sx={{
-        position: 'relative',
-        minHeight: '100vh',
-        minWidth: '100vw',
-        padding: 2,
-      }}
-    >
-      {/* Top bar with course title (right) */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-          mt: 0.5,
-        }}
-      >
-        <Box>
-          <Typography sx={{ color: '#ffffff' }}>CSCI3100 Software&nbsp;Engineering</Typography>
-        </Box>
-      </Box>
+  const handleLogin = () => {
+    router.push('/login');
+  };
 
+  // Show a loading spinner while client-side code is initializing
+  if (!isClientSide) {
+    return (
       <Box
         sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
+          position: 'relative',
+          minHeight: '100vh',
+          minWidth: '100vw',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          flexDirection: 'column',
-          textAlign: 'center',
         }}
       >
-        {/* Title */}
-        <Typography variant="h4" sx={{ color: '#ffffff', mb: 2 }}>
-          Fill in the Math
-        </Typography>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
-        {/* Center box with prompt and buttons */}
-        <Box
-          bgcolor={'#ffffff'}
-          width={{ xs: '400px', md: '600px' }}
-          height={{ xs: '120px', md: '144px' }}
-          borderRadius={2}
-        >
-          <Typography
-            sx={{
-              fontSize: { xs: '20px', md: '24px' },
-              m: { xs: 1.875, md: 2.25 },
-              color: '#000000',
-            }}
-          >
-            {isLoggedIn ? 'welcome back' : 'please select'}
-          </Typography>
-          <Grid container justifyContent="center">
-            {isLoggedIn ? (
-              <>
-                <Box>
-                  <Button
-                    onClick={handleContinueToLobby}
-                    variant="contained"
-                    sx={{
-                      fontSize: { xs: '1rem', md: '1.2rem' },
-                      borderRadius: '0 0 0 8px',
-                      backgroundColor: '#919191',
-                      '&:hover': { backgroundColor: '#7a7a7a' },
-                      width: { xs: '200px', md: '300px' },
-                      height: { xs: '60px', md: '72px' },
-                    }}
-                  >
-                    Lobby
-                  </Button>
-                </Box>
-                <Box>
-                  <Button
-                    onClick={handleLogout}
-                    variant="contained"
-                    fullWidth
-                    sx={{
-                      fontSize: { xs: '1rem', md: '1.2rem' },
-                      borderRadius: '0 0 8px 0',
-                      backgroundColor: '#919191',
-                      '&:hover': { backgroundColor: '#7a7a7a' },
-                      width: { xs: '200px', md: '300px' },
-                      height: { xs: '60px', md: '72px' },
-                    }}
-                  >
-                    Logout
-                  </Button>
-                </Box>
-              </>
-            ) : (
-              <>
-                <Box>
-                  <Button
-                    onClick={handlePlayAsGuest}
-                    variant="contained"
-                    sx={{
-                      fontSize: { xs: '1rem', md: '1.2rem' },
-                      borderRadius: '0 0 0 8px',
-                      backgroundColor: '#919191',
-                      '&:hover': { backgroundColor: '#7a7a7a' },
-                      width: { xs: '200px', md: '300px' },
-                      height: { xs: '60px', md: '72px' },
-                    }}
-                  >
-                    Play&nbsp;as&nbsp;Guest
-                  </Button>
-                </Box>
-                <Box>
-                  <Button
-                    onClick={() => router.push('/login')}
-                    variant="contained"
-                    fullWidth
-                    sx={{
-                      fontSize: { xs: '1rem', md: '1.2rem' },
-                      borderRadius: '0 0 8px 0',
-                      backgroundColor: '#919191',
-                      '&:hover': { backgroundColor: '#7a7a7a' },
-                      width: { xs: '200px', md: '300px' },
-                      height: { xs: '60px', md: '72px' },
-                    }}
-                  >
-                    Login/Register
-                  </Button>
-                </Box>
-              </>
-            )}
-          </Grid>
-        </Box>
-        {/* Title */}
-        <Typography variant="h4" sx={{ color: 'transparent', mb: 2 }}>
-          .
-        </Typography>
+  return (
+    <Box sx={{ position: 'relative', minHeight: '100vh', minWidth: '100vw' }}>
+      {/* Top Right Information Box */}
+      <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+        <UserProfile username={username || 'Guest'} avatarId={avatarId} experience={experience} />
       </Box>
 
-      {/* Bottom left information */}
-      <Box sx={{ position: 'fixed', bottom: 16, left: 16 }}>
+      {/* Center Join Box Component */}
+      <GameJoinCenterBox
+        username={username}
+        setUsername={setUsername}
+        roomCode={roomCode}
+        setRoomCode={setRoomCode}
+        isGuest={isGuest}
+        avatarId={avatarId}
+      />
+
+      {/* Bottom Left Information Box */}
+      <Box sx={{ position: 'absolute', bottom: 16, left: 16 }}>
         <Typography variant="body1" sx={{ color: '#ffffff' }}>
           Created by Group B8 <br></br> 1155194693&nbsp;Kwok&nbsp;Ka&nbsp;Ming&nbsp;|
           1155194687&nbsp;Lau&nbsp;Tsun&nbsp;Shing&nbsp;|
@@ -234,6 +222,37 @@ const HomePage = () => {
           <br></br>1155189319&nbsp;Cheng&nbsp;Jonathan&nbsp;Yue&nbsp;Ming |
           1155192782&nbsp;Chan&nbsp;Jackson&nbsp;|
         </Typography>
+      </Box>
+
+      {/* Login/Logout Controls */}
+      <Box sx={{ position: 'absolute', bottom: 16, right: 16 }}>
+        {isLoggedIn ? (
+          <Typography
+            variant="body1"
+            sx={{
+              color: '#ffffff',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+              '&:hover': { color: '#cccccc' },
+            }}
+            onClick={handleLogout}
+          >
+            Logout
+          </Typography>
+        ) : (
+          <Typography
+            variant="body1"
+            sx={{
+              color: '#ffffff',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+              '&:hover': { color: '#cccccc' },
+            }}
+            onClick={handleLogin}
+          >
+            Login/Register
+          </Typography>
+        )}
       </Box>
 
       {/* Notification for logout results */}

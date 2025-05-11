@@ -14,6 +14,7 @@ export interface GameJoinCenterBoxProps {
   roomCode: string;
   setRoomCode: (value: string) => void;
   isGuest?: boolean;
+  avatarId?: number;
 }
 
 const GameJoinCenterBox: React.FC<GameJoinCenterBoxProps> = ({
@@ -22,11 +23,13 @@ const GameJoinCenterBox: React.FC<GameJoinCenterBoxProps> = ({
   roomCode,
   setRoomCode,
   isGuest = false,
+  avatarId = 1,
 }) => {
   const router = useRouter();
   const {
     setUsername: setContextUsername,
     setRoomIdToJoin,
+    setAvatarId: setContextAvatarId,
     createRoom,
     joinRoom,
     quickJoin,
@@ -55,11 +58,13 @@ const GameJoinCenterBox: React.FC<GameJoinCenterBoxProps> = ({
 
   const handleQuickJoin = () => {
     setContextUsername(username);
+    setContextAvatarId(avatarId);
     quickJoin();
   };
 
   const handleHostGame = () => {
     setContextUsername(username);
+    setContextAvatarId(avatarId);
     createRoom();
   };
 
@@ -67,6 +72,7 @@ const GameJoinCenterBox: React.FC<GameJoinCenterBoxProps> = ({
     if (!roomCode) return;
 
     setContextUsername(username);
+    setContextAvatarId(avatarId);
     setRoomIdToJoin(roomCode);
     joinRoom();
   };

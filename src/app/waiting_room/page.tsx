@@ -9,6 +9,7 @@ import { Box, Grid, Typography } from '@mui/material';
 import { RoomStatus } from '@/lib/game.types';
 import socketService from '@/services/socket.service';
 
+import UserProfile from '../components/lobby/UserProfile';
 import GameEndResult, { GameResult } from '../components/waiting_room/game_end_result';
 import GameStartControls from '../components/waiting_room/game_start_controls';
 import PlayerList from '../components/waiting_room/player_list';
@@ -21,6 +22,8 @@ export default function WaitingRoomPage() {
 
   // Use GameEventsContext instead of direct socket communication
   const {
+    username,
+    avatarId,
     currentRoom,
     roomConfig,
     leaderboard,
@@ -45,7 +48,7 @@ export default function WaitingRoomPage() {
   // Update game status when room status changes
   useEffect(() => {
     if (!currentRoom) {
-      router.push('/lobby'); // Redirect to lobby if not in a room
+      router.push('/'); // Redirect to lobby if not in a room
       return;
     }
 
@@ -80,7 +83,7 @@ export default function WaitingRoomPage() {
   // Handle leave room
   const handleLeave = () => {
     leaveRoom();
-    router.push('/lobby');
+    router.push('/');
   };
 
   // Callback for switching back to the waiting room view after game ends
@@ -99,7 +102,7 @@ export default function WaitingRoomPage() {
   const gameResults: GameResult[] = leaderboard.map((entry) => ({
     rank: entry.rank,
     username: entry.username,
-    avatarId: currentRoom?.players.find((p) => p.id === entry.playerId)?.avatarID ?? 1,
+    avatarId: currentRoom?.players.find((p) => p.id === entry.playerId)?.avatarId ?? 1,
     score: entry.score,
   }));
 
@@ -111,6 +114,10 @@ export default function WaitingRoomPage() {
       minWidth="100vw"
       justifyContent="space-between"
     >
+      {/* Top Right Information Box */}
+      <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+        <UserProfile username={username || 'Guest'} avatarId={avatarId} experience={1} />
+      </Box>
       <Grid></Grid>
       <Grid container justifyContent={'center'} alignContent={'center'}>
         <Grid item width="100%" maxWidth={900}>
@@ -147,7 +154,7 @@ export default function WaitingRoomPage() {
                           id: Number(player.id),
                           username: player.username,
                           isHost: player.isHost,
-                          avatarID: player.avatarID,
+                          avatarId: player.avatarId,
                         })) || []
                       }
                       maxPlayers={roomConfig.maxPlayers}

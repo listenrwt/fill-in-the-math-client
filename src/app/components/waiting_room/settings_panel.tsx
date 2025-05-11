@@ -34,14 +34,12 @@ interface SettingsPanelProps {
 const SettingsPanel: React.FC<SettingsPanelProps> = ({
   timeLimit,
   difficulty,
-  maxPlayers,
   attackDamage,
   healAmount,
   wrongAnswerPenalty,
   disabled,
   onTimeLimitChange,
   onDifficultyChange,
-  onMaxPlayersChange,
   onAttackDamageChange,
   onHealAmountChange,
   onWrongAnswerPenaltyChange,
@@ -129,7 +127,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={6} sm={4}>
+        {/*         <Grid item xs={6} sm={4}>
           <TextField
             label="Max Players"
             type="number"
@@ -139,7 +137,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             fullWidth
             sx={textFieldSX}
           />
-        </Grid>
+        </Grid> */}
         <Grid item xs={6} sm={4}>
           <TextField
             label="Attack Damage"

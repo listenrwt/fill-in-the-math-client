@@ -35,6 +35,8 @@ export const useGameEvents = () => {
     gameMessage,
     setCurrentRoom,
     setGameMessage,
+    avatarId,
+    setAvatarId,
     createRoom,
     joinRoom,
     quickJoin,
@@ -243,6 +245,7 @@ export const useGameEvents = () => {
     health,
     canPerformAction,
     leaderboard,
+    avatarId,
 
     // State setters
     setServerUrl,
@@ -251,6 +254,7 @@ export const useGameEvents = () => {
     setRoomIdToJoin,
     handleRoomConfigChange,
     setAnswer,
+    setAvatarId,
 
     // Actions
     createRoom,
