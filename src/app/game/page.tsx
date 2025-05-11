@@ -30,6 +30,9 @@ export default function Page() {
   const [flashEffect, setFlashEffect] = useState<'none' | 'damage' | 'heal'>('none');
   const [prevHealth, setPrevHealth] = useState<number>(health);
 
+  // State for tracking if a question is loading
+  const [isLoadingQuestion, setIsLoadingQuestion] = useState<boolean>(false);
+
   // Detect health changes and trigger appropriate flash effect
   useEffect(() => {
     if (prevHealth === 0 && health > 0) {
@@ -55,12 +58,40 @@ export default function Page() {
     setPrevHealth(health);
   }, [health, prevHealth]);
 
-  // Redirect to waiting room if not in a room or if game has ended
+  // Redirect to waiting room if not in a room, if game has ended, or if player is dead
   useEffect(() => {
-    if (!currentRoom || currentRoom.status !== RoomStatus.IN_PROGRESS) {
+    if (!currentRoom) {
+      // No room, redirect to lobby
+      router.push('/');
+      return;
+    }
+
+    if (currentRoom.status !== RoomStatus.IN_PROGRESS) {
+      // Game is not in progress, redirect to waiting room
+      router.push('/waiting_room');
+      return;
+    }
+
+    if (health === 0) {
+      // Player is dead, redirect to waiting room with dead view
       router.push('/waiting_room');
     }
-  }, [currentRoom, router]);
+  }, [currentRoom, router, health]);
+
+  // Handle custom submit answer to show loading state
+  const handleSubmitAnswer = () => {
+    if (answer.length > 0) {
+      setIsLoadingQuestion(true);
+      submitAnswer();
+    }
+  };
+
+  // Effect to reset loading state when a new question arrives or when action is available
+  useEffect(() => {
+    if (currentQuestion || canPerformAction) {
+      setIsLoadingQuestion(false);
+    }
+  }, [currentQuestion, canPerformAction]);
 
   // Timer duration based on room config or default to 30 seconds
   const timerDuration = currentRoom?.config?.timeLimit ?? 30;
@@ -98,13 +129,14 @@ export default function Page() {
             currentQuestion={currentQuestion}
             answer={answer}
             setAnswer={setAnswer}
-            submitAnswer={submitAnswer}
+            submitAnswer={handleSubmitAnswer}
             performHeal={performHeal}
             performAttack={performAttack}
             canPerformAction={canPerformAction}
             health={health}
             // Pass globalTimeLeft for emergency glow effects inside GameContainer
             timeLeft={globalTimeLeft}
+            isLoadingQuestion={isLoadingQuestion}
           />
         )}
       </Grid2>

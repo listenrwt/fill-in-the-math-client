@@ -40,7 +40,7 @@ const GameEndResult: React.FC<GameEndResultProps> = ({ results }) => {
 
       <Grid container direction="row" mt={1} spacing={1}>
         <Grid item mt={3} mb={1} xs={3}>
-          <Typography variant="h5">Rank</Typography>
+          <Typography variant="h5">Place</Typography>
         </Grid>
         <Grid item mt={3} mb={1} xs={5}>
           <Typography variant="h5" textAlign={'left'}>

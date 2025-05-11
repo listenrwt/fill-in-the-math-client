@@ -5,11 +5,13 @@ import { Box, Button, Grid } from '@mui/material';
 
 interface GameStartControlsProps {
   isHost: boolean;
-  gameStatus?: string; // New prop to know the current game status
+  gameStatus?: string; // Current game status
   onStart: () => void;
   onLeave: () => void;
   // Callback to show the waiting room panel (player list and settings)
   onPlayAgain?: () => void;
+  // Flag to determine if player is dead but game is still in progress
+  isViewingLiveGame?: boolean;
 }
 
 const GameStartControls: React.FC<GameStartControlsProps> = ({
@@ -18,6 +20,7 @@ const GameStartControls: React.FC<GameStartControlsProps> = ({
   onStart,
   onLeave,
   onPlayAgain,
+  isViewingLiveGame = false,
 }) => {
   // Common trapezium-shaped button style.
   const trapeziumStyle = {
@@ -50,9 +53,9 @@ const GameStartControls: React.FC<GameStartControlsProps> = ({
             Leave
           </Button>
         </Box>
-        {/* Center: Start Button only shows if host and game status is not "Ended" */}
+        {/* Center: Start Button only shows if host and game status is not "Ended" and not viewing live game */}
         <Grid item>
-          {isHost && gameStatus !== 'Ended' ? (
+          {isHost && gameStatus !== 'Ended' && !isViewingLiveGame ? (
             <Button
               variant="contained"
               onClick={onStart}
@@ -88,6 +91,28 @@ const GameStartControls: React.FC<GameStartControlsProps> = ({
             }}
           >
             Play Again
+          </Button>
+        </Box>
+      )}
+
+      {/* Bottom-Right Button: Display "Spectating" indicator when viewing live game */}
+      {isViewingLiveGame && (
+        <Box sx={{ position: 'absolute', right: 0, bottom: 0 }}>
+          <Button
+            disabled
+            variant="outlined"
+            sx={{
+              borderColor: '#1976d2',
+              bgcolor: '#1976d2',
+              color: 'white',
+              opacity: 0.9,
+              '&.Mui-disabled': {
+                color: 'white',
+              },
+              ...trapeziumStyle,
+            }}
+          >
+            Spectating
           </Button>
         </Box>
       )}

@@ -4,7 +4,10 @@ import React, { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { Alert, Box, CircularProgress, Snackbar, Typography } from '@mui/material';
+import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { Alert, Box, Button, CircularProgress, Snackbar, Typography } from '@mui/material';
 
 import GameJoinCenterBox from './components/lobby/GameJoinCenterBox';
 import UserProfile from './components/lobby/UserProfile';
@@ -41,7 +44,23 @@ const HomePage = () => {
 
     const fetchUserData = async () => {
       try {
-        // Check if user is in guest mode
+        // First, attempt to fetch user data from the server
+        const userDataResult = await getUserData();
+
+        if (userDataResult.success && userDataResult.user) {
+          // User is logged in - use the fresh data from the server
+          setUsername(userDataResult.user.username);
+          setAvatarId(userDataResult.user.profile_picture || 1);
+          setExperience(userDataResult.user.experience);
+          setIsLoggedIn(true);
+          setIsGuest(false);
+
+          // Make sure to remove any guest flag since user is authenticated
+          localStorage.removeItem('isGuest');
+          return;
+        }
+
+        // If server data fetch failed, check if user is in guest mode
         const guestFlag = localStorage.getItem('isGuest');
 
         if (guestFlag === 'true') {
@@ -57,19 +76,6 @@ const HomePage = () => {
           const randomNumber = Math.floor(100 + Math.random() * 900);
           const newGuestUsername = `guest_${randomNumber}`;
           setUsername(newGuestUsername);
-          return;
-        }
-
-        // Not in guest mode, attempt to fetch user data from the server
-        const userDataResult = await getUserData();
-
-        if (userDataResult.success && userDataResult.user) {
-          // Use the fresh data from the server
-          setUsername(userDataResult.user.username);
-          setAvatarId(userDataResult.user.profile_picture || 1);
-          setExperience(userDataResult.user.experience);
-          setIsLoggedIn(true);
-          setIsGuest(false);
           return;
         }
 
@@ -147,12 +153,33 @@ const HomePage = () => {
     // Call logout function from useSystemEvents
     const result = await logout();
 
-    // Clear guest flags if they exist (safely)
-    try {
-      localStorage.removeItem('isGuest');
-      // No need to remove guestUsername since we're not storing it anymore
-    } catch (error) {
-      console.error('Error removing localStorage items:', error);
+    if (result.success) {
+      // Clear user data and set up guest mode
+      try {
+        // Remove user data from localStorage
+        localStorage.removeItem('user');
+
+        // Set guest mode flag
+        localStorage.setItem('isGuest', 'true');
+
+        // Generate random guest username and avatar
+        const randomNumber = Math.floor(100 + Math.random() * 900);
+        const guestUsername = `guest_${randomNumber}`;
+        const randomAvatarId = Math.floor(Math.random() * 6) + 1;
+
+        // Update the context directly
+        setUsername(guestUsername);
+        setAvatarId(randomAvatarId);
+        setExperience(0);
+
+        // Update local state for UI
+        setIsGuest(true);
+        setIsLoggedIn(false);
+
+        console.log('Successfully set up guest mode after logout');
+      } catch (error) {
+        console.error('Error setting up guest mode:', error);
+      }
     }
 
     // Display notification based on result
@@ -161,13 +188,6 @@ const HomePage = () => {
       message: result.success ? 'Logged out successfully' : result.message,
       severity: result.success ? 'success' : 'error',
     });
-
-    // Update login state
-    if (result.success) {
-      setIsLoggedIn(false);
-      // Generate a new guest username
-      handlePlayAsGuest();
-    }
   };
 
   const handleCloseNotification = () => {
@@ -176,6 +196,10 @@ const HomePage = () => {
 
   const handleLogin = () => {
     router.push('/login');
+  };
+
+  const handleSettings = () => {
+    router.push('/settings');
   };
 
   // Show a loading spinner while client-side code is initializing
@@ -201,8 +225,81 @@ const HomePage = () => {
       {/* Top Right Information Box */}
       <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
         <UserProfile username={username || 'Guest'} avatarId={avatarId} experience={experience} />
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, gap: 2 }}>
+          {isLoggedIn ? (
+            <>
+              <Button
+                variant="contained"
+                onClick={handleSettings}
+                startIcon={<SettingsIcon />}
+                sx={{
+                  backgroundColor: 'rgba(76, 175, 80, 0.8)',
+                  color: '#ffffff',
+                  borderRadius: '20px',
+                  padding: '8px 16px',
+                  fontWeight: 'bold',
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(5px)',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(76, 175, 80, 0.9)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 10px rgba(0, 0, 0, 0.15)',
+                  },
+                }}
+              >
+                Settings
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleLogout}
+                startIcon={<LogoutIcon />}
+                sx={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  color: '#ffffff',
+                  borderRadius: '20px',
+                  padding: '8px 16px',
+                  fontWeight: 'bold',
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(5px)',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 10px rgba(0, 0, 0, 0.15)',
+                  },
+                }}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="contained"
+              onClick={handleLogin}
+              startIcon={<LoginIcon />}
+              sx={{
+                backgroundColor: 'rgba(66, 133, 244, 0.8)',
+                color: '#ffffff',
+                borderRadius: '20px',
+                padding: '8px 16px',
+                fontWeight: 'bold',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                '&:hover': {
+                  backgroundColor: 'rgba(66, 133, 244, 1)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 6px 10px rgba(0, 0, 0, 0.15)',
+                },
+              }}
+            >
+              Login
+            </Button>
+          )}
+        </Box>
       </Box>
-
+      {/* Login/Logout Controls */}
+      <Box sx={{ position: 'absolute', bottom: 16, right: 16 }}></Box>
       {/* Center Join Box Component */}
       <GameJoinCenterBox
         username={username}
@@ -222,37 +319,6 @@ const HomePage = () => {
           <br></br>1155189319&nbsp;Cheng&nbsp;Jonathan&nbsp;Yue&nbsp;Ming |
           1155192782&nbsp;Chan&nbsp;Jackson&nbsp;|
         </Typography>
-      </Box>
-
-      {/* Login/Logout Controls */}
-      <Box sx={{ position: 'absolute', bottom: 16, right: 16 }}>
-        {isLoggedIn ? (
-          <Typography
-            variant="body1"
-            sx={{
-              color: '#ffffff',
-              textDecoration: 'underline',
-              cursor: 'pointer',
-              '&:hover': { color: '#cccccc' },
-            }}
-            onClick={handleLogout}
-          >
-            Logout
-          </Typography>
-        ) : (
-          <Typography
-            variant="body1"
-            sx={{
-              color: '#ffffff',
-              textDecoration: 'underline',
-              cursor: 'pointer',
-              '&:hover': { color: '#cccccc' },
-            }}
-            onClick={handleLogin}
-          >
-            Login/Register
-          </Typography>
-        )}
       </Box>
 
       {/* Notification for logout results */}

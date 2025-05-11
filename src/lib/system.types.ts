@@ -24,3 +24,23 @@ export interface AuthResponse {
   message: string;
   user?: UserData;
 }
+
+export interface PasswordResetData {
+  email: string;
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface UsernameChangeData {
+  newUsername: string;
+}
+
+export interface AvatarChangeData {
+  newAvatarId: number;
+}
+
+export interface AccountResponse {
+  success: boolean;
+  message: string;
+  user?: UserData;
+}
