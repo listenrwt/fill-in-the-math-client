@@ -19,6 +19,7 @@ export const LeaderboardPanel = ({
   deleteRoom,
   continueGame,
 }: LeaderboardPanelProps) => {
+  // Players are now ranked by elimination order, not by score
   // Check if there's a tie (multiple players with rank 1)
   const hasTie = leaderboard.filter((entry) => entry.rank === 1).length > 1;
 
@@ -40,7 +41,7 @@ export const LeaderboardPanel = ({
       <Box component="table" sx={{ width: '100%', mb: 2 }}>
         <Box component="thead">
           <Box component="tr" sx={{ '& th': { p: 1, textAlign: 'left' } }}>
-            <Box component="th">Rank</Box>
+            <Box component="th">Place</Box>
             <Box component="th">Player</Box>
             <Box component="th">Score</Box>
           </Box>

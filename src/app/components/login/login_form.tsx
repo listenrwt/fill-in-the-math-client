@@ -25,7 +25,7 @@ export default function LoginForm({ setNotification }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const { login, getUserData, loading } = useSystemEvents();
+  const { login, loading } = useSystemEvents();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,16 +55,12 @@ export default function LoginForm({ setNotification }: LoginFormProps) {
         localStorage.setItem('user', JSON.stringify(result.user));
       }
 
-      // Fetch latest user data from the server
-      const userDataResult = await getUserData();
+      // Make sure to remove the isGuest flag from localStorage since user is now logged in
+      localStorage.removeItem('isGuest');
 
-      if (!userDataResult.success) {
-        console.error('Failed to fetch complete user data:', userDataResult.message);
-      }
-
-      // Redirect to lobby after successful login
+      // Redirect to home page after successful login
       setTimeout(() => {
-        router.push('/lobby');
+        router.push('/');
       }, 1000);
     } else {
       setNotification({

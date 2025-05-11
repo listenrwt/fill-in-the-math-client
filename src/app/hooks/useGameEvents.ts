@@ -35,6 +35,8 @@ export const useGameEvents = () => {
     gameMessage,
     setCurrentRoom,
     setGameMessage,
+    avatarId,
+    setAvatarId,
     createRoom,
     joinRoom,
     quickJoin,
@@ -175,6 +177,26 @@ export const useGameEvents = () => {
     socketService.on<PlayerEliminatedResponse>(GameEvents.PLAYER_ELIMINATED, (data) => {
       if (socketService.getSocket()?.id === data.playerId) {
         setGameMessage('You have been eliminated!');
+        // Set health to exactly 0 when eliminated
+        setHealth(0);
+
+        // Make sure the player stays in the current room with proper status
+        setCurrentRoom((prevRoom) => {
+          if (!prevRoom) return prevRoom;
+
+          // Update the current player's health to 0 in the room
+          return {
+            ...prevRoom,
+            players: prevRoom.players.map((player) => {
+              if (player.id === data.playerId) {
+                return { ...player, health: 0 };
+              }
+              return player;
+            }),
+            // Keep the status as IN_PROGRESS since the game is still ongoing
+            status: RoomStatus.IN_PROGRESS,
+          };
+        });
       } else {
         setGameMessage(`Player ${data.playerId} has been eliminated!`);
       }
@@ -243,6 +265,7 @@ export const useGameEvents = () => {
     health,
     canPerformAction,
     leaderboard,
+    avatarId,
 
     // State setters
     setServerUrl,
@@ -251,6 +274,7 @@ export const useGameEvents = () => {
     setRoomIdToJoin,
     handleRoomConfigChange,
     setAnswer,
+    setAvatarId,
 
     // Actions
     createRoom,

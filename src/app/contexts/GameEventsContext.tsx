@@ -21,12 +21,14 @@ interface GameEventsContextValue {
   health: number;
   canPerformAction: boolean;
   leaderboard: LeaderboardEntry[];
+  avatarId: number;
 
   // State setters
   setServerUrl: (url: string) => void;
   setUsername: (username: string) => void;
   setRoomName: (roomName: string) => void;
   setRoomIdToJoin: (roomId: string) => void;
+  setAvatarId: (avatarId: number) => void;
   handleRoomConfigChange: (
     e: React.ChangeEvent<HTMLInputElement | { name: string; value: unknown }>
   ) => void;

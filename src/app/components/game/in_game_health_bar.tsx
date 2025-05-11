@@ -14,7 +14,7 @@ const InGameLeaderboard = () => {
     currentRoom?.players.map((player) => ({
       id: player.id,
       username: player.username,
-      avatarId: player.avatarID ?? 1,
+      avatarId: player.avatarId ?? 1,
       hp: player.health ?? 0,
       maxHp: currentRoom.config.timeLimit ?? 30,
     })) || [];

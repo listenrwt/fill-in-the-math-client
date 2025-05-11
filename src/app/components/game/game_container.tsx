@@ -7,7 +7,7 @@ import CalculatorDisplay from './ui/calculator/calculator_display';
 import CalculatorPanel from './ui/calculator/calculator_panel';
 import { Stroke } from './ui/stroke';
 
-// Extended interface to include timeLeft for emergency effects
+// Extended interface to include timeLeft for emergency effects and loading state
 interface GameContainerProps {
   currentQuestion: Question | null;
   answer: number[];
@@ -17,7 +17,8 @@ interface GameContainerProps {
   performAttack: (targetId: string) => void;
   canPerformAction: boolean;
   health: number;
-  timeLeft?: number; // Added: Global time left for emergency UI effects
+  timeLeft?: number; // Global time left for emergency UI effects
+  isLoadingQuestion?: boolean; // Whether a new question is being loaded
 }
 
 export default function GameContainer({
@@ -28,7 +29,8 @@ export default function GameContainer({
   performHeal,
   performAttack,
   canPerformAction,
-  timeLeft, // Added: retrieve timeLeft prop for emergency effects
+  timeLeft, // Global time left for emergency effects
+  isLoadingQuestion = false, // Whether a new question is being loaded
 }: GameContainerProps) {
   // Existing functions
   const handleNumberClick = (num: number) => {
@@ -83,6 +85,40 @@ export default function GameContainer({
               performAttack={performAttack}
               performHeal={performHeal}
             />
+          ) : isLoadingQuestion ? (
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '50vh',
+                p: 4,
+              }}
+            >
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 'bold',
+                  mb: 2,
+                  animation: 'pulse 1.5s infinite',
+                  '@keyframes pulse': {
+                    '0%': {
+                      opacity: 0.6,
+                    },
+                    '50%': {
+                      opacity: 1,
+                    },
+                    '100%': {
+                      opacity: 0.6,
+                    },
+                  },
+                }}
+              >
+                Loading new question...
+              </Typography>
+              <Typography variant="body1">Get ready for the next challenge!</Typography>
+            </Box>
           ) : (
             <>
               {currentQuestion && (
@@ -97,6 +133,7 @@ export default function GameContainer({
                 onSubmit={submitAnswer}
                 usedNumbers={answer}
                 equation={currentQuestion?.equation_arr || []}
+                disabled={isLoadingQuestion}
               />
             </>
           )}

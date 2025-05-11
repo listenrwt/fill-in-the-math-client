@@ -50,7 +50,7 @@ const GameActionProfile: React.FC<GameActionProfileProps> = ({ player, action, o
       {/* Container for the avatar and overlay image */}
       <Box position="relative" display="inline-block">
         <UserAvatar
-          avatarId={player.avatarID ?? 1} // fallback to 1 if undefined
+          avatarId={player.avatarId ?? 1} // fallback to 1 if undefined
           alt={player.username}
           sx={{ width: { xs: 70, sm: 80, md: 100 }, height: { xs: 70, sm: 80, md: 100 } }}
         />

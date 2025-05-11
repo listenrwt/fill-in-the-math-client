@@ -8,7 +8,7 @@ export interface Player {
   id?: number;
   username: string;
   isHost: boolean;
-  avatarID?: number;
+  avatarId?: number;
 }
 
 interface PlayerListProps {
@@ -36,7 +36,7 @@ const PlayerList: React.FC<PlayerListProps> = ({ players, maxPlayers }) => {
             <ListItem key={player.id || index}>
               <Box ml={1} display="flex" alignItems="center">
                 <UserAvatar
-                  avatarId={player.avatarID ?? 1} // fallback to 1 if undefined
+                  avatarId={player.avatarId ?? 1} // fallback to 1 if undefined
                   alt={player.username}
                   size={40}
                 />

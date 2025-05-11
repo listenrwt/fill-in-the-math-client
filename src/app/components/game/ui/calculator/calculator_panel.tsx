@@ -14,6 +14,7 @@ interface CalculatorPanelProps {
   onSubmit: () => void;
   usedNumbers?: number[];
   equation?: Equation; // Add equation as optional prop
+  disabled?: boolean; // Add disabled prop to disable the calculator panel
 }
 
 export default function CalculatorPanel({
@@ -23,6 +24,7 @@ export default function CalculatorPanel({
   onSubmit,
   usedNumbers = [],
   equation = [],
+  disabled = false,
 }: CalculatorPanelProps) {
   // Helper function to count the number of blanks in the equation
   const countBlanks = useCallback((): number => {
@@ -45,6 +47,9 @@ export default function CalculatorPanel({
   // Handle keyboard events
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Skip keyboard handling if the calculator is disabled
+      if (disabled) return;
+
       const { key } = event;
 
       // Handle number keys from 1 to 9
@@ -55,7 +60,7 @@ export default function CalculatorPanel({
         }
       }
       // Handle "Enter" key for confirm
-      else if (key === 'Enter') {
+      else if (key === 'Enter' && usedNumbers.length > 0 && usedNumbers.length >= countBlanks()) {
         onSubmit();
       }
       // Handle "Backspace" key for delete last
@@ -68,7 +73,16 @@ export default function CalculatorPanel({
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onNumberClick, onSubmit, onDeleteLast, isNumberUsed, isMaxInputsReached]);
+  }, [
+    onNumberClick,
+    onSubmit,
+    onDeleteLast,
+    isNumberUsed,
+    isMaxInputsReached,
+    disabled,
+    usedNumbers,
+    countBlanks,
+  ]);
 
   return (
     <Box sx={{ mt: 2, p: 2, borderRadius: 2 }}>
@@ -79,7 +93,7 @@ export default function CalculatorPanel({
               value={num}
               text={num.toString()}
               onClick={() => onNumberClick(num)}
-              disabled={isNumberUsed(num) || isMaxInputsReached()}
+              disabled={disabled || isNumberUsed(num) || isMaxInputsReached()}
               selected={isNumberUsed(num)}
             />
           </Grid>
@@ -92,7 +106,7 @@ export default function CalculatorPanel({
               value={num}
               text={num.toString()}
               onClick={() => onNumberClick(num)}
-              disabled={isNumberUsed(num) || isMaxInputsReached()}
+              disabled={disabled || isNumberUsed(num) || isMaxInputsReached()}
               selected={isNumberUsed(num)}
             />
           </Grid>
@@ -105,7 +119,7 @@ export default function CalculatorPanel({
               value={num}
               text={num.toString()}
               onClick={() => onNumberClick(num)}
-              disabled={isNumberUsed(num) || isMaxInputsReached()}
+              disabled={disabled || isNumberUsed(num) || isMaxInputsReached()}
               selected={isNumberUsed(num)}
             />
           </Grid>
@@ -113,13 +127,31 @@ export default function CalculatorPanel({
       </Grid>
       <Grid container justifyContent="center" spacing={2}>
         <Grid item>
-          <CalculatorButton value={'CLR'} text="CLR" variant="clear" onClick={onClear} />
+          <CalculatorButton
+            value={'CLR'}
+            text="CLR"
+            variant="clear"
+            onClick={onClear}
+            disabled={disabled}
+          />
         </Grid>
         <Grid item>
-          <CalculatorButton value={'DEL'} text="DEL" variant="delete" onClick={onDeleteLast} />
+          <CalculatorButton
+            value={'DEL'}
+            text="DEL"
+            variant="delete"
+            onClick={onDeleteLast}
+            disabled={disabled}
+          />
         </Grid>
         <Grid item>
-          <CalculatorButton value={'CON'} text="✔" variant="confirm" onClick={onSubmit} />
+          <CalculatorButton
+            value={'CON'}
+            text="✔"
+            variant="confirm"
+            onClick={onSubmit}
+            disabled={disabled || usedNumbers.length === 0 || usedNumbers.length < countBlanks()}
+          />
         </Grid>
       </Grid>
     </Box>
