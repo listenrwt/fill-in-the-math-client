@@ -98,22 +98,24 @@ const GameAction: React.FC<GameActionProps> = ({
           width: '100%',
         }}
       >
-        {allPlayers?.map((player) => (
-          <Box key={player.id}>
-            {/* individual player cards */}
-            <GameActionProfile
-              player={player}
-              action={player.id === currentPlayerId ? 'heal' : 'attack'}
-              onClick={() => {
-                if (player.id === currentPlayerId) {
-                  handleHeal();
-                } else {
-                  handleAttack(player.id);
-                }
-              }}
-            />
-          </Box>
-        ))}
+        {allPlayers
+          ?.filter((player) => player.health > 0) // Only include players with HP greater than 0
+          .map((player) => (
+            <Box key={player.id}>
+              {/* individual player cards */}
+              <GameActionProfile
+                player={player}
+                action={player.id === currentPlayerId ? 'heal' : 'attack'}
+                onClick={() => {
+                  if (player.id === currentPlayerId) {
+                    handleHeal();
+                  } else {
+                    handleAttack(player.id);
+                  }
+                }}
+              />
+            </Box>
+          ))}
       </Box>
     </Grid2>
   );
