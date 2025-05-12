@@ -12,7 +12,6 @@ import { RoomEvents } from '@/events/events';
 import { RoomStatus } from '@/lib/game.types';
 import socketService from '@/services/socket.service';
 
-import UserProfile from '../components/lobby/UserProfile';
 import GameEndResult, { GameResult } from '../components/waiting_room/game_end_result';
 import GameStartControls from '../components/waiting_room/game_start_controls';
 import PlayerDeadView from '../components/waiting_room/player_dead_view';
@@ -174,9 +173,6 @@ function WaitingRoomContent() {
       justifyContent="space-between"
     >
       {/* Top Right Information Box */}
-      <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
-        <UserProfile username={username || 'Guest'} avatarId={avatarId} experience={0} />
-      </Box>
       <Grid></Grid>
       <Grid container justifyContent={'center'} alignContent={'center'}>
         <Grid item width="100%" maxWidth={900}>

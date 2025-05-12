@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -32,6 +33,11 @@ const HomePage = () => {
   const [experience, setExperience] = useState(0);
   const [isGuest, setIsGuest] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // *** ADDED: State to track if the logged in user is an admin ***
+  const [isAdmin, setIsAdmin] = useState(false);
+  const adminRedirectUrl = process.env.NEXT_PUBLIC_ADMIN_PAGE_URL || '/localhost:3000';
+
   const [notification, setNotification] = useState({
     open: false,
     message: '',
@@ -54,6 +60,8 @@ const HomePage = () => {
           setExperience(userDataResult.user.experience);
           setIsLoggedIn(true);
           setIsGuest(false);
+          console.log(userDataResult.user.user_type);
+          setIsAdmin(userDataResult.user.user_type === 'Admin');
 
           // Make sure to remove any guest flag since user is authenticated
           localStorage.removeItem('isGuest');
@@ -89,6 +97,8 @@ const HomePage = () => {
             setExperience(userData.experience || 0);
             setIsLoggedIn(true);
             setIsGuest(false);
+            // *** ADDED: Check for admin property in the fallback user data ***
+            setIsAdmin(userData.admin === true);
           } catch (error) {
             console.error('Error parsing user data from localStorage:', error);
             // Set as guest since we couldn't get user data
@@ -202,6 +212,10 @@ const HomePage = () => {
     router.push('/settings');
   };
 
+  const handleAdmin = () => {
+    router.push(adminRedirectUrl);
+  };
+
   // Show a loading spinner while client-side code is initializing
   if (!isClientSide) {
     return (
@@ -224,10 +238,35 @@ const HomePage = () => {
     <Box sx={{ position: 'relative', minHeight: '100vh', minWidth: '100vw' }}>
       {/* Top Right Information Box */}
       <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
-        <UserProfile username={username || 'Guest'} avatarId={avatarId} experience={experience} />
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+          <UserProfile username={username || 'Guest'} avatarId={avatarId} experience={experience} />
+        </Box>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, gap: 2 }}>
           {isLoggedIn ? (
             <>
+              {isAdmin && (
+                <Button
+                  variant="contained"
+                  onClick={handleAdmin}
+                  startIcon={<AdminPanelSettingsIcon />}
+                  sx={{
+                    backgroundColor: 'red', // admin button background red
+                    color: '#ffffff',
+                    borderRadius: '20px',
+                    padding: '8px 16px',
+                    fontWeight: 'bold',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                    '&:hover': {
+                      backgroundColor: '#cc0000',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 6px 10px rgba(0, 0, 0, 0.15)',
+                    },
+                  }}
+                >
+                  Admin
+                </Button>
+              )}
               <Button
                 variant="contained"
                 onClick={handleSettings}
