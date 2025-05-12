@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+
+// Added Suspense
 
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -18,7 +20,8 @@ import PlayerList from '../components/waiting_room/player_list';
 import SettingsPanel from '../components/waiting_room/settings_panel';
 import { useGameEventsContext } from '../contexts/GameEventsContext';
 
-export default function WaitingRoomPage() {
+// This new component will contain the core logic and use client-side hooks
+function WaitingRoomContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -326,5 +329,20 @@ export default function WaitingRoomPage() {
         </Box>
       </Grid>
     </Grid>
+  );
+}
+
+// The default export is now a wrapper that uses Suspense
+export default function WaitingRoomPage() {
+  return (
+    <Suspense
+      fallback={
+        <Grid container justifyContent="center" alignItems="center" sx={{ minHeight: '100vh' }}>
+          <Typography variant="h5">Loading Waiting Room...</Typography>
+        </Grid>
+      }
+    >
+      <WaitingRoomContent />
+    </Suspense>
   );
 }
