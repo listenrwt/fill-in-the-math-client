@@ -3,7 +3,7 @@ import React from 'react';
 
 import { Box, LinearProgress, Typography } from '@mui/material';
 
-import UserAvatar from '../userAvatar';
+import UserAvatar from '../UserAvatar';
 
 export interface UserProfileProps {
   username: string;

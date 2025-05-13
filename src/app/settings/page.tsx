@@ -22,12 +22,12 @@ import {
 } from '@mui/material';
 
 import { UserData } from '../../lib/system.types';
-import AccountActions from '../components/settings/accountActions';
-import ChangeAvatar from '../components/settings/changeAvatar';
-import ChangeUsername from '../components/settings/changeUsername';
-import ResetPassword from '../components/settings/resetPassword';
+import AccountActions from '../components/settings/AccountActions';
+import ChangeAvatar from '../components/settings/ChangeAvatar';
+import ChangeUsername from '../components/settings/ChangeUsername';
+import ResetPassword from '../components/settings/ResetPassword';
 // Import new components
-import UserProfile from '../components/settings/userProfile';
+import UserProfile from '../components/settings/UserProfile';
 import { useGameEventsContext } from '../contexts/GameEventsContext';
 import useSystemEvents from '../hooks/useSystemEvents';
 

@@ -4,7 +4,7 @@ import { Box, LinearProgress, Stack, Typography } from '@mui/material';
 
 import { useGameEventsContext } from '@/app/contexts/GameEventsContext';
 
-import UserAvatar from '../userAvatar';
+import UserAvatar from '../UserAvatar';
 
 const InGameLeaderboard = () => {
   const { currentRoom } = useGameEventsContext();

@@ -6,7 +6,7 @@ import { Box, CircularProgress, Grid, Typography } from '@mui/material';
 
 import { Player } from '@/lib/game.types';
 
-import UserAvatar from '../userAvatar';
+import UserAvatar from '../UserAvatar';
 
 interface LivePlayerStatsProps {
   players: Player[];

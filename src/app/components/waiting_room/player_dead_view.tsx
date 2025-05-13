@@ -6,9 +6,9 @@ import { Box, Typography } from '@mui/material';
 
 import { Player } from '@/lib/game.types';
 
+import UserAvatar from '../UserAvatar';
 import InGameLeaderboard from '../game/in_game_health_bar';
 import Stroke from '../game/ui/stroke';
-import UserAvatar from '../userAvatar';
 import LivePlayerStats from './live_player_stats';
 
 interface PlayerDeadViewProps {

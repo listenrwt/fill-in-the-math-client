@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Box, List, ListItem, Typography } from '@mui/material';
 
-import UserAvatar from '../userAvatar';
+import UserAvatar from '../UserAvatar';
 
 export interface Player {
   id?: number;
