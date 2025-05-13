@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 import { Box, Button, Typography } from '@mui/material';
 
-import UserAvatar from '@/app/components/UserAvatar';
+import UserAvatar from '@/app/components/userAvatar';
 import { Player } from '@/lib/game.types';
 
 interface GameActionProfileProps {

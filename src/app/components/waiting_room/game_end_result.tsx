@@ -4,8 +4,8 @@ import React from 'react';
 
 import { Box, Grid, Typography } from '@mui/material';
 
-import UserAvatar from '../UserAvatar';
 import Stroke from '../game/ui/stroke';
+import UserAvatar from '../userAvatar';
 
 export interface GameResult {
   rank: number;

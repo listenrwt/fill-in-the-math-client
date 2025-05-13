@@ -5,7 +5,7 @@ import React from 'react';
 import { Box, Grid, Paper, Typography } from '@mui/material';
 
 import avatarMap from '../../assets/avatarMap';
-import UserAvatar from '../UserAvatar';
+import UserAvatar from '../userAvatar';
 
 interface ChangeAvatarProps {
   selectedAvatarId: number;

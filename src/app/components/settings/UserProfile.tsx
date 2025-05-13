@@ -5,7 +5,7 @@ import React from 'react';
 import { Box, Paper, Typography } from '@mui/material';
 
 import { UserData } from '../../lib/system.types';
-import UserAvatar from '../UserAvatar';
+import UserAvatar from '../userAvatar';
 
 interface UserProfileProps {
   userData: UserData | null;
