@@ -5,9 +5,6 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import LogoutIcon from '@mui/icons-material/Logout';
-import SaveIcon from '@mui/icons-material/Save';
 import {
   Alert,
   Box,
@@ -20,15 +17,17 @@ import {
   DialogContentText,
   DialogTitle,
   Grid,
-  Paper,
   Snackbar,
-  TextField,
   Typography,
 } from '@mui/material';
 
 import { UserData } from '../../lib/system.types';
-import avatarMap from '../assets/avatarMap';
-import UserAvatar from '../components/UserAvatar';
+import AccountActions from '../components/settings/accountActions';
+import ChangeAvatar from '../components/settings/changeAvatar';
+import ChangeUsername from '../components/settings/changeUsername';
+import ResetPassword from '../components/settings/resetPassword';
+// Import new components
+import UserProfile from '../components/settings/userProfile';
 import { useGameEventsContext } from '../contexts/GameEventsContext';
 import useSystemEvents from '../hooks/useSystemEvents';
 
@@ -57,7 +56,7 @@ const SettingsPage = () => {
     severity: 'success' as 'success' | 'error',
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [passwordError, setPasswordError] = useState(''); // Refresh user data
+  const [passwordError, setPasswordError] = useState('');
 
   // Load user data on component mount
   useEffect(() => {
@@ -84,7 +83,6 @@ const SettingsPage = () => {
               setSelectedAvatarId(userData.profile_picture || 1);
             } catch (parseError) {
               console.error('Error parsing user data from localStorage:', parseError);
-              // If localStorage data is invalid, redirect to home
               router.push('/');
               setNotification({
                 open: true,
@@ -93,7 +91,6 @@ const SettingsPage = () => {
               });
             }
           } else {
-            // If no user data found in API or localStorage, redirect to home
             router.push('/');
             setNotification({
               open: true,
@@ -104,8 +101,6 @@ const SettingsPage = () => {
         }
       } catch (error) {
         console.error('Failed to fetch user data:', error);
-
-        // Attempt to get user data from localStorage as fallback
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
           try {
@@ -170,39 +165,28 @@ const SettingsPage = () => {
 
       if (!userResult.success || !userResult.user) {
         console.warn('First validation attempt failed. Trying again...');
-
-        // Try one more time before concluding the session is invalid
         const retryResult = await getUserData();
 
         if (!retryResult.success || !retryResult.user) {
           console.error('Session validation failed after retry:', retryResult.message);
-
-          // Try to use localStorage data if available before giving up
           if (userData) {
             console.log('Using existing userData to proceed');
-            // Continue with existing data rather than immediately failing
             return true;
           }
-
           setNotification({
             open: true,
             message: 'Your session has expired. Please log in again.',
             severity: 'error',
           });
-
-          // Redirect to login after a short delay
           setTimeout(() => {
             router.push('/login');
           }, 1500);
-
           return false;
         } else {
-          // Second attempt succeeded
           setUserData(retryResult.user);
           console.log('Second validation attempt succeeded');
         }
       } else {
-        // Update local userData with fresh data from server
         setUserData(userResult.user);
       }
 
@@ -210,25 +194,19 @@ const SettingsPage = () => {
       return true;
     } catch (error) {
       console.error('Error validating session:', error);
-
-      // Try to use localStorage data if available before giving up on error
       if (userData) {
         console.log('Using existing userData to proceed despite error');
         return true;
       }
-
       setNotification({
         open: true,
         message: 'Authentication error. Please log in again.',
         severity: 'error',
       });
-
-      // Last resort - check if we at least have the user data in local component state
       if (userData) {
         console.log('Using component state userData as last resort fallback');
         return true;
       }
-
       return false;
     }
   };
@@ -253,7 +231,6 @@ const SettingsPage = () => {
       return;
     }
 
-    // Validate session before proceeding
     const isSessionValid = await validateSessionBeforeAction();
     if (!isSessionValid) return;
 
@@ -267,7 +244,6 @@ const SettingsPage = () => {
 
       if (result.success) {
         setUsername(newUsername);
-        // Update local userData to reflect changes
         if (userData) {
           setUserData({
             ...userData,
@@ -309,7 +285,6 @@ const SettingsPage = () => {
       return;
     }
 
-    // Validate session before proceeding
     const isSessionValid = await validateSessionBeforeAction();
     if (!isSessionValid) return;
 
@@ -323,7 +298,6 @@ const SettingsPage = () => {
 
       if (result.success) {
         setAvatarId(avatarId);
-        // Update local userData to reflect changes
         if (userData) {
           setUserData({
             ...userData,
@@ -354,10 +328,8 @@ const SettingsPage = () => {
 
   // Handle password reset
   const handlePasswordReset = async () => {
-    // Reset error state
     setPasswordError('');
 
-    // Validation
     if (!currentPassword) {
       setPasswordError('Current password is required');
       return;
@@ -378,7 +350,6 @@ const SettingsPage = () => {
       return;
     }
 
-    // Validate session before proceeding
     const isSessionValid = await validateSessionBeforeAction();
     if (!isSessionValid) return;
 
@@ -392,11 +363,9 @@ const SettingsPage = () => {
       console.log('Password reset response:', result);
 
       if (result.success) {
-        // Clear password fields
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
-
         setNotification({
           open: true,
           message: 'Password updated successfully',
@@ -427,7 +396,6 @@ const SettingsPage = () => {
       return;
     }
 
-    // Validate session before proceeding
     const isSessionValid = await validateSessionBeforeAction();
     if (!isSessionValid) {
       setDeleteDialogOpen(false);
@@ -440,27 +408,19 @@ const SettingsPage = () => {
       console.log('Account deletion response:', result);
 
       if (result.success) {
-        // Clear user data and set up guest mode
         try {
-          // Remove user data from localStorage
           localStorage.removeItem('user');
-
-          // Set guest mode flag
           localStorage.setItem('isGuest', 'true');
 
-          // Generate random guest username and avatar
           const randomNumber = Math.floor(100 + Math.random() * 900);
           const guestUsername = `guest_${randomNumber}`;
           const randomAvatarId = Math.floor(Math.random() * 6) + 1;
 
-          // Update both local state and global context
-          setUsername(guestUsername); // Updates the username in GameEventsContext
-          setAvatarId(randomAvatarId); // Updates the avatar in GameEventsContext
-
-          // Additionally update local UI state
+          setUsername(guestUsername);
+          setAvatarId(randomAvatarId);
           setNewUsername(guestUsername);
           setSelectedAvatarId(randomAvatarId);
-          setUserData(null); // Clear user data in local state
+          setUserData(null);
 
           console.log('Successfully set up guest mode after account deletion');
         } catch (error) {
@@ -473,7 +433,6 @@ const SettingsPage = () => {
           severity: 'success',
         });
 
-        // Redirect to home after a short delay
         setTimeout(() => {
           router.push('/');
         }, 1500);
@@ -501,27 +460,19 @@ const SettingsPage = () => {
     try {
       const result = await logout();
       if (result.success) {
-        // Clear user data and set up guest mode
         try {
-          // Remove user data from localStorage
           localStorage.removeItem('user');
-
-          // Set guest mode flag
           localStorage.setItem('isGuest', 'true');
 
-          // Generate random guest username and avatar
           const randomNumber = Math.floor(100 + Math.random() * 900);
           const guestUsername = `guest_${randomNumber}`;
           const randomAvatarId = Math.floor(Math.random() * 6) + 1;
 
-          // Update both local state and global context
-          setUsername(guestUsername); // Updates the username in GameEventsContext
-          setAvatarId(randomAvatarId); // Updates the avatar in GameEventsContext
-
-          // Additionally update local UI state
+          setUsername(guestUsername);
+          setAvatarId(randomAvatarId);
           setNewUsername(guestUsername);
           setSelectedAvatarId(randomAvatarId);
-          setUserData(null); // Clear user data in local state
+          setUserData(null);
 
           console.log('Successfully set up guest mode after logout');
         } catch (error) {
@@ -534,7 +485,6 @@ const SettingsPage = () => {
           severity: 'success',
         });
 
-        // Redirect to home after a short delay
         setTimeout(() => {
           router.push('/');
         }, 1500);
@@ -566,7 +516,6 @@ const SettingsPage = () => {
     });
   };
 
-  // Show loading spinner while data is being fetched
   if (loading || !isClientSide) {
     return (
       <Box
@@ -579,206 +528,65 @@ const SettingsPage = () => {
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
-      <Button
-        startIcon={<ArrowBackIcon />}
-        onClick={handleBack}
-        variant="contained"
-        sx={{
-          mb: 4,
-          backgroundColor: 'rgba(66, 133, 244, 0.8)',
-          '&:hover': {
-            backgroundColor: 'rgba(66, 133, 244, 1)',
-          },
-        }}
-      >
-        Back to Lobby
-      </Button>
+      <Box justifyContent={{ xs: 'center', md: 'center', lg: 'left' }} display="flex">
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={handleBack}
+          variant="contained"
+          sx={{
+            mb: 4,
+            backgroundColor: 'rgba(66, 133, 244, 0.8)',
+            '&:hover': {
+              backgroundColor: 'rgba(66, 133, 244, 1)',
+            },
+          }}
+        >
+          Back to Lobby
+        </Button>
+      </Box>
 
       <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold', textAlign: 'center' }}>
         Account Settings
       </Typography>
 
       <Grid container spacing={4}>
-        {/* Profile Section */}
         <Grid item xs={12}>
-          <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-            <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold' }}>
-              Profile
-            </Typography>
-
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-              <UserAvatar avatarId={selectedAvatarId} size={80} />
-              <Box sx={{ ml: 2 }}>
-                <Typography variant="h6">{userData?.username}</Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {userData?.email}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Experience: {userData?.experience || 0}
-                </Typography>
-              </Box>
-            </Box>
-          </Paper>
+          <UserProfile userData={userData} selectedAvatarId={selectedAvatarId} />
         </Grid>
 
-        {/* Username Change Section */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ p: 3, borderRadius: 2, height: '100%' }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Change Username
-            </Typography>
-            <TextField
-              fullWidth
-              label="New Username"
-              value={newUsername}
-              onChange={(e) => setNewUsername(e.target.value)}
-              margin="normal"
-              variant="outlined"
-            />
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              onClick={handleUsernameChange}
-              startIcon={<SaveIcon />}
-              sx={{ mt: 2 }}
-            >
-              Save Username
-            </Button>
-          </Paper>
+          <ChangeUsername
+            newUsername={newUsername}
+            setNewUsername={setNewUsername}
+            handleUsernameChange={handleUsernameChange}
+          />
         </Grid>
 
-        {/* Avatar Selection Section */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ p: 3, borderRadius: 2, height: '100%' }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Change Avatar
-            </Typography>
-            <Grid container spacing={1}>
-              {Object.entries(avatarMap).map(([id]) => (
-                <Grid item key={id}>
-                  <Box
-                    sx={{
-                      p: 1,
-                      border:
-                        selectedAvatarId === Number(id)
-                          ? '3px solid #4285F4'
-                          : '3px solid transparent',
-                      borderRadius: '50%',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        transform: 'scale(1.05)',
-                      },
-                    }}
-                    onClick={() => handleAvatarChange(Number(id))}
-                  >
-                    <UserAvatar avatarId={Number(id)} size={50} />
-                  </Box>
-                </Grid>
-              ))}
-            </Grid>
-          </Paper>
+          <ChangeAvatar
+            selectedAvatarId={selectedAvatarId}
+            handleAvatarChange={handleAvatarChange}
+          />
         </Grid>
 
-        {/* Password Reset Section */}
         <Grid item xs={12}>
-          <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Reset Password
-            </Typography>
-            {passwordError && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {passwordError}
-              </Alert>
-            )}
-            <TextField
-              fullWidth
-              label="Current Password"
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              margin="normal"
-              variant="outlined"
-            />
-            <TextField
-              fullWidth
-              label="New Password"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              margin="normal"
-              variant="outlined"
-            />
-            <TextField
-              fullWidth
-              label="Confirm New Password"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              margin="normal"
-              variant="outlined"
-              error={newPassword !== confirmPassword && confirmPassword !== ''}
-              helperText={
-                newPassword !== confirmPassword && confirmPassword !== ''
-                  ? 'Passwords do not match'
-                  : ''
-              }
-            />
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              onClick={handlePasswordReset}
-              startIcon={<SaveIcon />}
-              sx={{ mt: 2 }}
-            >
-              Update Password
-            </Button>
-          </Paper>
+          <ResetPassword
+            passwordError={passwordError}
+            currentPassword={currentPassword}
+            newPassword={newPassword}
+            confirmPassword={confirmPassword}
+            setCurrentPassword={setCurrentPassword}
+            setNewPassword={setNewPassword}
+            setConfirmPassword={setConfirmPassword}
+            handlePasswordReset={handlePasswordReset}
+          />
         </Grid>
 
-        {/* Logout and Delete Account Section */}
         <Grid item xs={12}>
-          <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Account Actions
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  startIcon={<LogoutIcon />}
-                  onClick={handleLogout}
-                  sx={{
-                    backgroundColor: 'rgba(66, 133, 244, 0.8)',
-                    '&:hover': {
-                      backgroundColor: 'rgba(66, 133, 244, 1)',
-                    },
-                  }}
-                >
-                  Logout
-                </Button>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="error"
-                  startIcon={<DeleteForeverIcon />}
-                  onClick={() => setDeleteDialogOpen(true)}
-                >
-                  Delete Account
-                </Button>
-              </Grid>
-            </Grid>
-          </Paper>
+          <AccountActions handleLogout={handleLogout} setDeleteDialogOpen={setDeleteDialogOpen} />
         </Grid>
       </Grid>
 
-      {/* Delete Account Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
         <DialogTitle>Delete Account</DialogTitle>
         <DialogContent>
@@ -795,7 +603,6 @@ const SettingsPage = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Notification Snackbar */}
       <Snackbar
         open={notification.open}
         autoHideDuration={6000}
