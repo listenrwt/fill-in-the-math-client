@@ -5,7 +5,8 @@ Welcome to Fill in the math, an online arithmetic battle royale created by Group
 You can try our Game through our online server: https://fill-in-the-math-client-production.up.railway.app/
 
 **OR**
-Run the game locally.
+
+## Run the game locally
 
 1. Clone Repository  
 ```bash
@@ -39,6 +40,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 Remember to run both the server and the client simultaneously for it to work. Link to server git repository: https://github.com/listenrwt/fill-in-the-math-server
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
 
 ## How to play?
 
